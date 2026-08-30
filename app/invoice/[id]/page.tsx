@@ -1,148 +1,169 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
-import { dbStore } from "@/lib/dbStore";
-import type { OrderWithRelations } from "@/lib/types";
-import { MapPin, Phone } from "lucide-react";
+import { use, useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
-
+import { MapPin, Phone } from "lucide-react";
+import { getBill, getServerVersion, getSettings, getVersion, subscribe } from "@/lib/store";
+import { amount, dateLong, money, monthShort, timeLabel } from "@/lib/format";
 import { InvoiceActions } from "./InvoiceActions";
 
 export default function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [order, setOrder] = useState<OrderWithRelations | null>(null);
-  const [loaded, setLoaded] = useState(false);
 
+  /* Bills live in browser storage; -1 is the server snapshot, where there is
+     nothing to read yet. */
+  const version = useSyncExternalStore(subscribe, getVersion, getServerVersion);
+  const loaded = version >= 0;
+  const bill = loaded ? getBill(id) : null;
+  const shop = loaded ? getSettings() : null;
+
+  /* Auto-print when the POS opens the invoice with ?print=1 */
   useEffect(() => {
-    let cancelled = false;
-    dbStore.getOrderWithRelations(id).then((result) => {
-      if (cancelled) return;
-      setOrder(result);
-      setLoaded(true);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
+    if (!loaded || !bill) return;
+    if (new URLSearchParams(window.location.search).get("print") !== "1") return;
+    const timer = setTimeout(() => window.print(), 500);
+    return () => clearTimeout(timer);
+  }, [loaded, bill]);
 
   if (!loaded) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
-        <p className="text-[#0D9488] font-bold text-sm uppercase tracking-widest animate-pulse">
-          Loading invoice…
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <p className="animate-pulse text-[12px] font-bold uppercase tracking-[0.2em] text-[#0a6127]">
+          Loading bill…
         </p>
       </div>
     );
   }
 
-  if (!order) {
+  if (!bill) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
-        <p className="text-[#0D9488] font-bold text-xl">Invoice Not Found</p>
-        <Link href="/" className="px-6 py-2 bg-[#FAFAFA] border border-[#0D9488]/30 hover:bg-white rounded-lg text-[#000000] font-bold transition-colors">
-          Return to Dashboard
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-4 text-center">
+        <p className="text-xl font-bold text-[#0a6127]">Bill Not Found</p>
+        <p className="max-w-sm text-[13px] text-gray-500">
+          Bills are stored on the device that created them, so this link only opens on that browser.
+        </p>
+        <Link
+          href="/"
+          className="rounded-lg border border-[#d8dde3] bg-white px-6 py-2.5 text-sm font-semibold text-gray-800 transition hover:bg-gray-50"
+        >
+          Return home
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-[#000000] font-sans py-12 px-4 print:p-0 print:bg-white flex flex-col items-center">
-      <style>{`
-        @media print {
-          @page {
-            margin: 10mm;
-          }
-          body {
-            background-color: white !important;
-            color: black !important;
-            padding: 0 !important;
-            margin: 0 !important;
-          }
-        }
-      `}</style>
+    <div className="flex min-h-screen flex-col items-center bg-[#f7f8fa] px-4 py-8 print:bg-white print:p-0">
+      <style>{`@media print { @page { margin: 10mm; } body { background: #fff !important; } }`}</style>
 
-      {/* Top Navigation / Action Bar (Hidden when printing) */}
-      <div className="w-full max-w-3xl flex justify-end items-center mb-8 print:hidden gap-4">
+      <div className="mb-5 flex w-full max-w-3xl justify-end no-print">
         <InvoiceActions />
       </div>
 
-      {/* The Invoice Document */}
-      <div className="w-full max-w-3xl bg-white border border-[#0D9488]/30 rounded-2xl shadow-xl print:shadow-none print:border-none print:rounded-none overflow-hidden">
-
-        {/* Header Section */}
-        <div className="bg-[#ffffff] border-b border-[#e5e5e5] p-8 sm:p-12 print:p-6 flex flex-col items-center text-center relative">
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#0D9488] via-[#0D9488] to-[#0D9488]" />
-          <div className="w-24 h-24 flex items-center justify-center mb-3">
-            <img src="/logo.png" alt="PMBJK MAKKAL MARUNDHAGAM Logo" className="max-w-full max-h-full object-contain" />
-          </div>
-          <h1 className="text-3xl font-black text-[#0D9488] tracking-tight">PMBJK MAKKAL MARUNDHAGAM</h1>
-          <p className="text-xs text-[#0D9488] font-bold tracking-wider mt-1 mb-1">All Medicines & Surgical Items Available</p>
-          <p className="text-xs text-[#0D9488] font-bold tracking-wider mb-4">INVOICE: {order.id}</p>
-
-          <div className="flex flex-col items-center gap-2 text-sm text-[#333333] font-semibold">
-            <div className="text-center max-w-md leading-relaxed">
-              <span className="inline-block text-[#0D9488] mr-1.5 align-middle -mt-0.5">
-                <MapPin className="w-3.5 h-3.5" />
-              </span>
-              <span>Near Masaniamman Temple West Entrance, Anaimalai</span>
-            </div>
-            <div className="flex items-center gap-1.5 justify-center">
-              <Phone className="w-3.5 h-3.5 text-[#0D9488] shrink-0" />
-              <span>+91 73390 40439 / +91 96266 80930</span>
-            </div>
-          </div>
+      <div className="w-full max-w-3xl overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white print:rounded-none print:border-0">
+        {/* Header */}
+        <div className="flex flex-col items-center border-b border-[#eceff2] px-8 py-7 text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="" className="mb-2.5 h-16 w-16 object-contain" />
+          <h1 className="text-[22px] font-extrabold tracking-tight text-[#0a6127]">
+            {shop?.shop_name || "PMBJK MAKKAL MARUNDHAGAM"}
+          </h1>
+          <p className="mt-1 flex items-center gap-1.5 text-[12.5px] text-gray-600">
+            <MapPin className="h-3.5 w-3.5 text-[#0a6127]" /> {shop?.address}
+          </p>
+          <p className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-gray-600">
+            <Phone className="h-3.5 w-3.5 text-[#0a6127]" /> {shop?.phone}
+          </p>
+          <p className="mt-1.5 text-[11.5px] text-gray-500">
+            GSTIN: {shop?.gstin} · DL No: {shop?.dl_no}
+          </p>
         </div>
 
-        {/* Invoice Meta Data */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 p-8 sm:p-12 print:p-6 border-b border-[#e5e5e5]/50">
+        {/* Meta */}
+        <div className="grid grid-cols-1 gap-6 border-b border-[#eceff2] px-8 py-5 sm:grid-cols-2">
           <div>
-            <h3 className="text-[10px] font-bold text-[#666666] uppercase tracking-[0.2em] mb-3">Billed To</h3>
-            <p className="text-base font-bold text-[#0D9488]">{order.customer_name || "Guest Customer"}</p>
-            {order.customer_phone && (
-              <p className="text-sm text-[#555555] font-semibold mt-1">+91 {order.customer_phone}</p>
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500">
+              Billed To
+            </p>
+            <p className="text-[15px] font-bold text-gray-900">
+              {bill.customer_name || "Walk-in Customer"}
+            </p>
+            {bill.customer_phone && (
+              <p className="text-[13px] text-gray-600">+91 {bill.customer_phone}</p>
+            )}
+            {bill.customer_address && (
+              <p className="text-[12.5px] text-gray-500">{bill.customer_address}</p>
+            )}
+            {bill.doctor_name && (
+              <p className="mt-1 text-[12.5px] text-gray-600">Doctor: {bill.doctor_name}</p>
+            )}
+            {bill.customer_id && (
+              <p className="mt-1 text-[12px] text-gray-500">Customer ID: {bill.customer_id}</p>
             )}
           </div>
-          <div className="sm:text-right flex flex-col sm:items-end">
-            <h3 className="text-[10px] font-bold text-[#666666] uppercase tracking-[0.2em] mb-3 self-start sm:self-auto">Order Details</h3>
-            <div className="inline-block text-left text-sm space-y-1">
-              <div className="flex gap-2">
-                <span className="text-[#666666] font-bold w-12 text-left sm:text-right">Date:</span>
-                <span className="text-[#000000] font-black">{new Date(order.bill_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-[#666666] font-bold w-12 text-left sm:text-right">Time:</span>
-                <span className="text-[#000000] font-black">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-[#666666] font-bold w-12 text-left sm:text-right">Type:</span>
-                <span className="text-[#000000] font-black uppercase">{order.source} SALE</span>
-              </div>
-            </div>
+          <div className="sm:text-right">
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500">
+              Bill Details
+            </p>
+            <p className="text-[15px] font-bold text-gray-900">Bill No: {bill.id}</p>
+            <p className="text-[13px] text-gray-600">{dateLong(bill.bill_date)}</p>
+            <p className="text-[12.5px] text-gray-500">{timeLabel(bill.created_at)}</p>
+            <p className="mt-1 text-[12.5px] text-gray-600">Payment: {bill.payment_method}</p>
           </div>
         </div>
 
-        {/* Items Table */}
-        <div className="p-8 sm:p-12 print:py-4 print:px-6">
-          <div className="w-full overflow-x-auto scrollbar-thin pb-2">
-            <table className="w-full text-left border-collapse min-w-[400px]">
+        {/* Items */}
+        <div className="px-8 py-5">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[560px]">
               <thead>
-                <tr className="border-b-2 border-[#0D9488]/30">
-                  <th className="py-4 text-[11px] font-bold text-[#666666] uppercase tracking-wider">Item Description</th>
-                  <th className="py-4 text-[11px] font-bold text-[#666666] uppercase tracking-wider text-center">Qty</th>
-                  <th className="py-4 text-[11px] font-bold text-[#666666] uppercase tracking-wider text-right">Price</th>
-                  <th className="py-4 text-[11px] font-bold text-[#666666] uppercase tracking-wider text-right">Total</th>
+                <tr className="border-b-2 border-[#e6ebe8] text-left">
+                  <th className="py-2.5 text-[11px] font-bold uppercase tracking-wide text-gray-600">
+                    Product
+                  </th>
+                  <th className="py-2.5 text-center text-[11px] font-bold uppercase tracking-wide text-gray-600">
+                    Box
+                  </th>
+                  <th className="py-2.5 text-center text-[11px] font-bold uppercase tracking-wide text-gray-600">
+                    Batch / EXP
+                  </th>
+                  <th className="py-2.5 text-center text-[11px] font-bold uppercase tracking-wide text-gray-600">
+                    Qty
+                  </th>
+                  <th className="py-2.5 text-right text-[11px] font-bold uppercase tracking-wide text-gray-600">
+                    Per unit price
+                  </th>
+                  <th className="py-2.5 text-right text-[11px] font-bold uppercase tracking-wide text-gray-600">
+                    Selling price (₹)
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e5e5e5]/40">
-                {order.items.map((item, index: number) => (
-                  <tr key={index} className="group">
-                    <td className="py-6 pr-4 print:py-3">
-                      <p className="text-sm font-bold text-[#0D9488]">{item.snapshot_name}</p>
+              <tbody className="divide-y divide-[#f1f3f5]">
+                {bill.items.map((item) => (
+                  <tr key={item.id}>
+                    <td className="py-3 pr-3">
+                      <p className="text-[13px] font-semibold text-gray-900">{item.generic_name}</p>
+                      <p className="text-[11px] text-gray-500">
+                        {item.brand_name} · {item.manufacturer} · HSN {item.hsn_code}
+                      </p>
                     </td>
-                    <td className="py-6 px-4 print:py-3 text-center text-sm font-bold text-[#000000]">{item.quantity}</td>
-                    <td className="py-6 pl-4 print:py-3 text-right text-sm font-bold text-[#000000]">₹{Number(item.snapshot_price).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    <td className="py-6 pl-4 print:py-3 text-right text-sm font-black text-[#0D9488]">₹{(Number(item.snapshot_price) * item.quantity).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    <td className="py-3 text-center text-[12.5px] text-gray-700">
+                      {item.box || "-"}
+                    </td>
+                    <td className="py-3 text-center text-[11.5px] text-gray-600">
+                      {item.batch_no}
+                      <br />
+                      {monthShort(item.exp_date)}
+                    </td>
+                    <td className="py-3 text-center text-[13px] font-semibold text-gray-900">
+                      {item.qty}
+                    </td>
+                    <td className="py-3 text-right text-[13px] text-gray-800">
+                      {amount(item.per_unit_price)}
+                    </td>
+                    <td className="py-3 text-right text-[13px] font-bold text-gray-900">
+                      {amount(item.line_amount)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -150,58 +171,45 @@ export default function InvoicePage({ params }: { params: Promise<{ id: string }
           </div>
         </div>
 
-        {/* Totals Section */}
-        <div className="bg-[#ffffff] border-t border-[#e5e5e5] p-8 sm:p-12 print:p-6 flex justify-end">
-
-            {/* Calculations */}
-            <div className="w-full sm:w-1/2 space-y-3">
-              {(Number(order.discount_amount) > 0 || Number(order.delivery_fee) > 0 || Number(order.gst_amount) > 0) && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-[#666666] font-bold uppercase tracking-wider">Subtotal</span>
-                  <span className="font-bold text-[#000000]">₹{Number(order.subtotal).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                </div>
-              )}
-
-              {Number(order.discount_amount) > 0 && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-[#666666] font-bold uppercase tracking-wider">
-                    Discount {order.discount_type === 'PERCENT' ? `(${order.discount_value}%)` : ''}
-                  </span>
-                  <span className="font-bold text-[#0F766E]">-₹{Number(order.discount_amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                </div>
-              )}
-
-              {Number(order.gst_amount) > 0 && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-[#666666] font-bold uppercase tracking-wider">
-                    GST ({order.gst_percentage}%)
-                  </span>
-                  <span className="font-bold text-[#000000]">₹{Number(order.gst_amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                </div>
-              )}
-
-              {Number(order.delivery_fee) > 0 && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-[#666666] font-bold uppercase tracking-wider">Delivery Fee</span>
-                  <span className="font-bold text-[#000000]">₹{Number(order.delivery_fee).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                </div>
-              )}
-
-              <div className="border-t border-[#0D9488]/30 pt-4 mt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-2">
-                <span className="text-sm font-black text-[#0D9488] uppercase tracking-widest shrink-0">Total Amount</span>
-                <span className="text-3xl font-black text-[#0D9488] self-end sm:self-auto leading-none mt-1 sm:mt-0">
-                  ₹{Number(order.grand_total).toLocaleString(undefined, {minimumFractionDigits: 2})}
-                </span>
-              </div>
+        {/* Totals */}
+        <div className="flex justify-end border-t border-[#eceff2] px-8 py-5">
+          <div className="w-full max-w-[300px] space-y-2 text-[13px]">
+            <Row label={`Sub Total (${bill.items.length} Items)`} value={money(bill.sub_total)} />
+            <Row label="Discount" value={money(bill.discount)} green />
+            <Row label="Taxable Amount" value={money(bill.taxable_amount)} />
+            <Row label={`GST (${bill.gst_percent}%)`} value={money(bill.gst_amount)} />
+            <div className="flex items-center justify-between border-t border-[#e6ebe8] pt-3">
+              <span className="text-[15px] font-bold text-gray-900">TOTAL</span>
+              <span className="text-[22px] font-extrabold text-[#0a6127]">
+                {money(bill.grand_total)}
+              </span>
             </div>
-        </div>
-        {/* Footer */}
-        <div className="border-t border-[#e5e5e5]/60 p-6 print:p-4 text-center bg-[#fafafa] flex flex-col items-center justify-center gap-1.5">
-          <p className="text-xs font-bold text-[#0D9488] tracking-wider uppercase">Thank you for shopping!</p>
-          <p className="text-[9px] font-bold text-[#666666]/80 uppercase tracking-[0.15em]">Powered by Cenexa Systems @2026</p>
+            <Row label="Received" value={money(bill.received_amount)} />
+            <Row label="Change" value={money(bill.change_amount)} green />
+          </div>
         </div>
 
+        {/* Footer */}
+        <div className="border-t border-[#eceff2] bg-[#fafbfc] px-8 py-5 text-center">
+          <p className="text-[12px] font-bold uppercase tracking-wide text-[#0a6127]">
+            Thank you for shopping!
+          </p>
+          <p className="mt-1 text-[11px] text-gray-500">
+            GST is included in the MRP and selling price. The GST % indicates the applicable tax rate
+            only.
+          </p>
+          <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.15em] text-gray-400">
+            Powered by Cenexa Systems
+          </p>
+        </div>
       </div>
     </div>
   );
 }
+
+const Row = ({ label, value, green }: { label: string; value: string; green?: boolean }) => (
+  <div className="flex items-center justify-between">
+    <span className="text-gray-600">{label}</span>
+    <span className={`font-semibold ${green ? "text-[#0a6127]" : "text-gray-900"}`}>{value}</span>
+  </div>
+);
