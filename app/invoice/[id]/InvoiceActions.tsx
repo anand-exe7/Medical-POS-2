@@ -24,7 +24,7 @@ export function InvoiceActions() {
     <div className="flex items-center gap-3">
       <button 
         onClick={handleCopyLink}
-        className="flex items-center gap-2 bg-white hover:bg-[#FAFAFA] text-[#134E4A] hover:text-[#0D9488] font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-lg shadow-sm border border-[#0D9488]/30 transition-colors cursor-pointer"
+        className="flex items-center gap-2 bg-white hover:bg-[#FAFAFA] text-[#02222d] hover:text-[#0a6127] font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-lg shadow-sm border border-[#0a6127]/30 transition-colors cursor-pointer"
       >
         {copied ? (
           <>
@@ -38,7 +38,7 @@ export function InvoiceActions() {
       </button>
       <button 
         onClick={handlePrint}
-        className="flex items-center gap-2 bg-gradient-to-r from-[#0D9488] via-[#0D9488] to-[#0D9488] hover:brightness-105 text-white font-bold text-xs uppercase tracking-wider px-5 py-2 rounded-lg shadow-md transition-all cursor-pointer"
+        className="flex items-center gap-2 bg-gradient-to-r from-[#0a6127] via-[#0a6127] to-[#0a6127] hover:brightness-105 text-white font-bold text-xs uppercase tracking-wider px-5 py-2 rounded-lg shadow-md transition-all cursor-pointer"
       >
         <Printer className="w-4 h-4" /> Download PDF / Print
       </button>
