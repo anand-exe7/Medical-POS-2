@@ -1,35 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #0D9488;
-  --secondary: #0D9488;
+  /* Palette sampled from the client mockups */
+  --brand-sidebar: #02222d;
+  --brand-sidebar-2: #04303c;
+  --brand-green: #0f7a31;
+  --brand-deep: #0a6127;
+  --brand-ink: #0b2b1a;
+  --surface: #f7f8fa;
+  --line: #e5e7eb;
+  --primary: #0f7a31;
+  --secondary: #0a6127;
+}
+
+@theme {
+  --color-brand-sidebar: #02222d;
+  --color-brand-green: #0f7a31;
+  --color-brand-deep: #0a6127;
+  --color-brand-mint: #e8f5ec;
+  --color-surface: #f7f8fa;
+  --color-line: #e5e7eb;
+  --color-primary: #0f7a31;
+  --color-secondary: #0a6127;
 }
 
 body {
   font-family: var(--font-poppins), system-ui, -apple-system, "Segoe UI", sans-serif;
-  background-color: #FFFFFF;
+  background-color: var(--surface);
+  color: #111827;
 }
 
-/* Custom scrollbar */
+/* Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #0D9488;
+  background: #c9d1d6;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #134E4A;
-}
-
-@layer utilities {
-  .minimal-input {
-    @apply w-full bg-transparent border-b border-black/10 py-2 text-[#000000] focus:outline-none focus:border-[#0D9488] transition-colors placeholder:text-[#000000];
-  }
+  background: var(--brand-green);
 }
 
 /* Hide number input spin buttons */
@@ -42,24 +56,37 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-@theme {
-  --color-primary: #0D9488;
-  --color-secondary: #0D9488;
-  --animate-float: float 3s ease-in-out infinite;
-  --animate-swing: swing 2.5s ease-in-out infinite;
-  --animate-pop: pop 2s ease-in-out infinite;
-  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+@layer utilities {
+  .field {
+    @apply w-full rounded-lg border border-[#d8dde3] bg-white px-3 py-2.5 text-sm text-gray-900
+           outline-none transition placeholder:text-gray-400
+           focus:border-[#0f7a31] focus:ring-2 focus:ring-[#0f7a31]/15;
+  }
+  .field-label {
+    @apply mb-1.5 block text-[13px] font-medium text-gray-700;
+  }
+  .card {
+    @apply rounded-xl border border-[#e5e7eb] bg-white;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-[#0a6127] px-5 py-2.5
+           text-sm font-semibold text-white transition hover:bg-[#0d7530]
+           disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[#d8dde3] bg-white
+           px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50;
+  }
+  .th {
+    @apply px-2.5 py-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-gray-600;
+  }
+  .td {
+    @apply px-2.5 py-3 text-[13px] text-gray-800;
+  }
+}
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
-  }
-  @keyframes swing {
-    0%, 100% { transform: rotate(-5deg); }
-    50% { transform: rotate(5deg); }
-  }
-  @keyframes pop {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+@media print {
+  .no-print {
+    display: none !important;
   }
 }
