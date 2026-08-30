@@ -1,11 +1,11 @@
 {
-  "name": "PMBJK MAKKAL MARUNDHAGAM - POS",
-  "short_name": "PMBJK MAKKAL MARUNDHAGAM",
+  "name": "Makkal Marundhagam - Pharmacy Management System",
+  "short_name": "Makkal Marundhagam",
   "description": "PMBJK MAKKAL MARUNDHAGAM Point of Sale, Billing & Inventory Management",
   "start_url": "/pos/admin/secure/control-panel/pmbjk-makkal-marundhagam",
   "display": "standalone",
   "background_color": "#FFFFFF",
-  "theme_color": "#0D9488",
+  "theme_color": "#02222d",
   "orientation": "any",
   "scope": "/",
   "icons": [
