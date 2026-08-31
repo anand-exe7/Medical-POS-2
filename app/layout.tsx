@@ -42,6 +42,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${poppins.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <link rel="manifest" href="/manifest.json" />
@@ -50,7 +51,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="PMBJK MAKKAL MARUNDHAGAM" />
         <link rel="apple-touch-icon" href="/logo.png" />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
         <PWAHandler />
       </body>

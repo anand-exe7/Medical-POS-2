@@ -11,7 +11,8 @@ import {
   calcTotal,
 } from "@/lib/calc";
 import { amount, monthShort, todayIso, unitNoun } from "@/lib/format";
-import { getSettings, saveBatch, saveMedicine } from "@/lib/store";
+import { getSettings } from "@/lib/store";
+import { saveBatch, saveMedicine } from "@/lib/actions";
 import { Button, Card, Field, ScreenHeading, Select, TextInput } from "./ui";
 
 /** Dropdown options requested by the client (slide 9 / 10) */
@@ -121,7 +122,7 @@ export const Purchase = ({
   const unitWord = unitNoun(form.purchaseUnitType, packSize);
 
   /* -------------------------------- save --------------------------------- */
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.genericName.trim()) return setError("Enter the medicine (generic) name.");
     if (!form.brandName.trim()) return setError("Enter the brand name.");
     if (!form.batchNo.trim()) return setError("Enter the batch number.");
@@ -134,7 +135,7 @@ export const Purchase = ({
 
     setError("");
 
-    const medicine = saveMedicine({
+    const medicineId = await saveMedicine({
       id: form.medicineId || undefined,
       generic_name: form.genericName.trim(),
       brand_name: form.brandName.trim(),
@@ -147,8 +148,8 @@ export const Purchase = ({
       low_stock_threshold: getSettings().low_stock_threshold,
     });
 
-    saveBatch({
-      medicine_id: medicine.id,
+    await saveBatch({
+      medicine_id: medicineId,
       supplier_id: form.supplierId || null,
       invoice_no: form.invoiceNo.trim(),
       purchase_date: form.date,
@@ -167,7 +168,7 @@ export const Purchase = ({
       gst_percent: Number(form.gst) || 0,
     });
 
-    onSaved(`Stock added — ${stockAdded} ${unitWord} of ${medicine.generic_name}.`);
+    onSaved(`Stock added — ${stockAdded} ${unitWord} of ${form.genericName.trim()}.`);
     setForm({ ...blankForm(), supplierId: form.supplierId, invoiceNo: form.invoiceNo, date: form.date });
   };
 

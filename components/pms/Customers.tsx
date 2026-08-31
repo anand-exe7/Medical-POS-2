@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { Search, Download, Plus, Pencil, Trash2, Receipt, Phone, MapPin } from "lucide-react";
 import type { Bill, Customer } from "@/lib/types";
 import { amount, dateSlash, money } from "@/lib/format";
-import { deleteCustomer, saveCustomer } from "@/lib/store";
+import { deleteCustomer, saveCustomer } from "@/lib/actions";
 import { CUSTOMERS_SHEET } from "./exports";
 import { downloadExcel } from "@/lib/xlsx";
 import { Button, Card, Field, Modal, PageTitle, Pill, TextInput } from "./ui";
@@ -161,9 +161,9 @@ export const Customers = ({
                             <Pencil className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => {
+                            onClick={async () => {
                               if (confirm(`Delete customer ${customer.name || customer.id}?`)) {
-                                deleteCustomer(customer.id);
+                                await deleteCustomer(customer.id);
                                 onChanged("Customer deleted.");
                               }
                             }}
@@ -309,9 +309,9 @@ const CustomerFormModal = ({
             Cancel
           </Button>
           <Button
-            onClick={() => {
+            onClick={async () => {
               if (!draft.name.trim() && !draft.phone.trim()) return;
-              saveCustomer({ id: customer?.id, ...draft });
+              await saveCustomer({ id: customer?.id, ...draft });
               onSaved(customer ? "Customer updated." : "Customer added.");
             }}
           >

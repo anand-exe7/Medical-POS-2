@@ -218,3 +218,5 @@ export type Store = {
     customer: number;
   };
 };
+
+export type BatchRow = { batch: Batch; medicine: Medicine; supplier_name: string };

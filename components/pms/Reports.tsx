@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { Download, FileSpreadsheet, Search, Trash2, Eye, Printer } from "lucide-react";
 import type { Bill } from "@/lib/types";
 import { amount, dateSlash, money, monthShort, todayIso } from "@/lib/format";
-import { deleteBill, listBatchRows } from "@/lib/store";
+import { deleteBill } from "@/lib/actions";
 import { BILL_SUMMARY_SHEET, INVENTORY_SHEET, SALES_SHEET } from "./exports";
 import { downloadCsv, downloadExcel } from "@/lib/xlsx";
 import { Button, Card, Field, Modal, PageTitle, Select, StatTile, TextInput } from "./ui";
@@ -41,9 +41,11 @@ const startOf = (period: Period, from: string, to: string): [string, string] => 
 
 export const Reports = ({
   bills,
+  batchRows,
   onChanged,
 }: {
   bills: Bill[];
+  batchRows: any[];
   onChanged: (message?: string) => void;
 }) => {
   const [period, setPeriod] = useState<Period>("MONTH");
@@ -97,7 +99,7 @@ export const Reports = ({
   };
 
   const exportInventory = (format: "xlsx" | "csv") => {
-    const sheet = INVENTORY_SHEET(listBatchRows());
+    const sheet = INVENTORY_SHEET(batchRows);
     if (format === "csv") downloadCsv(sheet, `inventory-${stamp}.csv`);
     else downloadExcel([sheet], `inventory-${stamp}.xlsx`);
   };
@@ -254,10 +256,10 @@ export const Reports = ({
                         <Printer className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm(`Delete bill ${bill.id}? Stock will be returned.`)) {
-                            deleteBill(bill.id);
-                            onChanged("Bill deleted and stock returned.");
+                        onClick={async () => {
+                          if (confirm(`Delete bill ${bill.id}?`)) {
+                            await deleteBill(bill.id);
+                            onChanged(`Bill ${bill.id} deleted.`);
                           }
                         }}
                         aria-label="Delete bill"

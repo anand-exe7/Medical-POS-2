@@ -4,31 +4,30 @@ import React, { useMemo, useState } from "react";
 import { Save, Download, Upload, RotateCcw, Plus, Trash2, Pencil, Boxes } from "lucide-react";
 import type { MedicineWithBatches, ShopSettings, Supplier } from "@/lib/types";
 import {
-  deleteSupplier,
   exportBackup,
-  getSettings,
   importBackup,
   resetStore,
-  saveSettings,
-  saveSupplier,
 } from "@/lib/store";
+import { deleteSupplier, saveSettings, saveSupplier } from "@/lib/actions";
 import { downloadBlob } from "@/lib/xlsx";
 import { Button, Card, Field, Modal, PageTitle, TextInput } from "./ui";
 
 export const SettingsPanel = ({
+  settings: initialSettings,
   suppliers,
   medicines,
   onChanged,
 }: {
+  settings: ShopSettings | null;
   suppliers: Supplier[];
   medicines: MedicineWithBatches[];
   onChanged: (message?: string) => void;
 }) => {
-  const [settings, setSettings] = useState<ShopSettings>(getSettings());
+  const [settings, setSettings] = useState<ShopSettings | null>(initialSettings);
   const [supplierDraft, setSupplierDraft] = useState<Supplier | null>(null);
   const [addingSupplier, setAddingSupplier] = useState(false);
 
-  const set = (patch: Partial<ShopSettings>) => setSettings({ ...settings, ...patch });
+  const set = (patch: Partial<ShopSettings>) => settings && setSettings({ ...settings, ...patch });
 
   /* Box mapping overview — where every product sits */
   const boxMap = useMemo(() => {
@@ -78,19 +77,19 @@ export const SettingsPanel = ({
           <h3 className="mb-4 text-[15px] font-bold text-gray-900">Shop Details</h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Shop name" className="sm:col-span-2">
-              <TextInput value={settings.shop_name} onChange={(e) => set({ shop_name: e.target.value })} />
+              <TextInput value={settings?.shop_name} onChange={(e) => set({ shop_name: e.target.value })} />
             </Field>
             <Field label="Address" className="sm:col-span-2">
-              <TextInput value={settings.address} onChange={(e) => set({ address: e.target.value })} />
+              <TextInput value={settings?.address} onChange={(e) => set({ address: e.target.value })} />
             </Field>
             <Field label="Phone">
-              <TextInput value={settings.phone} onChange={(e) => set({ phone: e.target.value })} />
+              <TextInput value={settings?.phone} onChange={(e) => set({ phone: e.target.value })} />
             </Field>
             <Field label="GSTIN">
-              <TextInput value={settings.gstin} onChange={(e) => set({ gstin: e.target.value })} />
+              <TextInput value={settings?.gstin} onChange={(e) => set({ gstin: e.target.value })} />
             </Field>
             <Field label="Drug Licence No" className="sm:col-span-2">
-              <TextInput value={settings.dl_no} onChange={(e) => set({ dl_no: e.target.value })} />
+              <TextInput value={settings?.dl_no} onChange={(e) => set({ dl_no: e.target.value })} />
             </Field>
           </div>
 
@@ -99,21 +98,21 @@ export const SettingsPanel = ({
             <Field label="Default GST %" hint="GST is included in MRP and selling price">
               <TextInput
                 type="number"
-                value={settings.default_gst}
+                value={settings?.default_gst}
                 onChange={(e) => set({ default_gst: Number(e.target.value) || 0 })}
               />
             </Field>
             <Field label="Low stock threshold">
               <TextInput
                 type="number"
-                value={settings.low_stock_threshold}
+                value={settings?.low_stock_threshold}
                 onChange={(e) => set({ low_stock_threshold: Number(e.target.value) || 0 })}
               />
             </Field>
             <Field label="Expiry alert (months)">
               <TextInput
                 type="number"
-                value={settings.expiry_alert_months}
+                value={settings?.expiry_alert_months}
                 onChange={(e) => set({ expiry_alert_months: Number(e.target.value) || 0 })}
               />
             </Field>
@@ -121,12 +120,14 @@ export const SettingsPanel = ({
 
           <div className="mt-5 flex justify-end">
             <Button
-              onClick={() => {
-                saveSettings(settings);
-                onChanged("Settings saved.");
+              onClick={async () => {
+                if (settings) {
+                  await saveSettings(settings);
+                  onChanged("Settings saved successfully.");
+                }
               }}
             >
-              <Save className="h-4 w-4" /> Save settings
+              <Save className="h-4 w-4" /> Save Settings
             </Button>
           </div>
         </Card>
@@ -156,9 +157,9 @@ export const SettingsPanel = ({
                   <Pencil className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => {
-                    if (confirm(`Delete supplier ${supplier.name}?`)) {
-                      deleteSupplier(supplier.id);
+                  onClick={async () => {
+                    if (confirm(`Delete ${supplier.name}?`)) {
+                      await deleteSupplier(supplier.id);
                       onChanged("Supplier deleted.");
                     }
                   }}
@@ -242,10 +243,10 @@ export const SettingsPanel = ({
           setAddingSupplier(false);
           setSupplierDraft(null);
         }}
-        onSaved={() => {
+        onSaved={(msg) => {
           setAddingSupplier(false);
           setSupplierDraft(null);
-          onChanged("Supplier saved.");
+          onChanged(msg);
         }}
       />
     </div>
@@ -261,7 +262,7 @@ const SupplierModal = ({
   open: boolean;
   supplier: Supplier | null;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (msg: string) => void;
 }) => {
   // Keyed at the call site, so the draft is seeded once on mount.
   const [draft, setDraft] = useState({
@@ -284,10 +285,10 @@ const SupplierModal = ({
             Cancel
           </Button>
           <Button
-            onClick={() => {
+            onClick={async () => {
               if (!draft.name.trim()) return;
-              saveSupplier({ id: supplier?.id, ...draft });
-              onSaved();
+              await saveSupplier({ id: supplier?.id, ...draft });
+              onSaved(supplier ? "Supplier updated." : "Supplier added.");
             }}
           >
             Save

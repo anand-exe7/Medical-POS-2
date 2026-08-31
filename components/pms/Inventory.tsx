@@ -18,7 +18,8 @@ import {
 } from "lucide-react";
 import type { Batch, DrugSchedule, Medicine, MedicineWithBatches, PurchaseUnitType } from "@/lib/types";
 import { amount, expiryState, monthSlash, scheduleLabel, unitNoun } from "@/lib/format";
-import { type BatchRow, deleteBatch, deleteMedicine, saveBatch, saveMedicine } from "@/lib/store";
+import { type BatchRow } from "@/lib/store";
+import { deleteBatch, deleteMedicine, saveBatch, saveMedicine, adjustBatchStock } from "@/lib/actions";
 import { INVENTORY_SHEET } from "./exports";
 import { downloadCsv, downloadExcel } from "@/lib/xlsx";
 import { Button, Card, Field, Modal, PageTitle, Pill, Select, StatTile, TextInput } from "./ui";
@@ -340,9 +341,9 @@ export const Inventory = ({
                                 <Pencil className="h-4 w-4" />
                               </button>
                               <button
-                                onClick={() => {
+                                onClick={async () => {
                                   if (confirm(`Delete batch ${batch.batch_no}?`)) {
-                                    deleteBatch(batch.id);
+                                    await deleteBatch(batch.id);
                                     onChanged("Batch deleted.");
                                   }
                                 }}
@@ -538,9 +539,9 @@ const MedicineMaster = ({
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           if (confirm(`Delete ${medicine.generic_name} and all its batches?`)) {
-                            deleteMedicine(medicine.id);
+                            await deleteMedicine(medicine.id);
                             onChanged("Medicine deleted.");
                           }
                         }}
@@ -597,8 +598,8 @@ const EditBatchModal = ({
             Cancel
           </Button>
           <Button
-            onClick={() => {
-              saveBatch({
+            onClick={async () => {
+              await saveBatch({
                 ...draft,
                 stock_added: draft.pack_size * draft.qty_packs,
               });
@@ -713,8 +714,8 @@ const EditMedicineModal = ({
             Cancel
           </Button>
           <Button
-            onClick={() => {
-              saveMedicine(draft);
+            onClick={async () => {
+              await saveMedicine(draft);
               onSaved();
             }}
           >

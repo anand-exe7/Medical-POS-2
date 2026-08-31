@@ -3,18 +3,14 @@
 import React, { startTransition, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { expiryState } from "@/lib/format";
 import {
-  batchRowsSnapshot,
-  billsSnapshot,
-  customersSnapshot,
-  emptyBatchRows,
-  emptyBills,
-  emptyCustomers,
-  emptyMedicines,
-  emptySuppliers,
-  medicinesSnapshot,
-  subscribe,
-  suppliersSnapshot,
-} from "@/lib/store";
+  useMedicines,
+  useBatchRows,
+  useBills,
+  useCustomers,
+  useSuppliers,
+  useSettings,
+  mutateAll,
+} from "@/components/pms/data";
 import { Sidebar, type ScreenKey } from "@/components/pms/Sidebar";
 import { TopBar } from "@/components/pms/TopBar";
 import { Login } from "@/components/pms/Login";
@@ -40,18 +36,19 @@ export default function PharmacyManagementSystem() {
   const [toast, setToast] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
 
-  /* --------------------------------- data --------------------------------
-     The store publishes on every write, so every screen re-reads automatically
-     — no manual refresh plumbing. Each snapshot keeps its reference until the
-     store actually changes. */
-  const medicines = useSyncExternalStore(subscribe, medicinesSnapshot, emptyMedicines);
-  const batchRows = useSyncExternalStore(subscribe, batchRowsSnapshot, emptyBatchRows);
-  const bills = useSyncExternalStore(subscribe, billsSnapshot, emptyBills);
-  const customers = useSyncExternalStore(subscribe, customersSnapshot, emptyCustomers);
-  const suppliers = useSyncExternalStore(subscribe, suppliersSnapshot, emptySuppliers);
+  /* --------------------------------- data -------------------------------- */
+  const { data: medicines = [], isLoading: medLoading } = useMedicines();
+  const { data: batchRows = [], isLoading: batchLoading } = useBatchRows();
+  const { data: bills = [], isLoading: billsLoading } = useBills();
+  const { data: customers = [], isLoading: custLoading } = useCustomers();
+  const { data: suppliers = [], isLoading: suppLoading } = useSuppliers();
+  const { data: settings = null, isLoading: setLoading } = useSettings();
+
+  const isDataLoading = medLoading || batchLoading || billsLoading || custLoading || suppLoading || setLoading;
 
   /** Screens call this after a change purely to surface a toast. */
   const notify = (message?: string) => {
+    mutateAll();
     if (message) setToast(message);
   };
 
@@ -126,7 +123,7 @@ export default function PharmacyManagementSystem() {
     setBillingSearch(query);
   };
 
-  if (checking) {
+  if (checking || isDataLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#02222d]">
         <p className="animate-pulse text-[12px] font-bold uppercase tracking-[0.2em] text-white/60">
@@ -210,13 +207,13 @@ export default function PharmacyManagementSystem() {
           )}
 
           {screen === "reports" && role === "admin" && (
-            <Reports bills={bills} onChanged={notify} />
+            <Reports bills={bills} batchRows={batchRows} onChanged={notify} />
           )}
 
           {screen === "expiry" && <ExpiryAlert rows={batchRows} />}
 
           {screen === "settings" && role === "admin" && (
-            <SettingsPanel suppliers={suppliers} medicines={medicines} onChanged={notify} />
+            <SettingsPanel settings={settings} suppliers={suppliers} medicines={medicines} onChanged={notify} />
           )}
         </main>
       </div>

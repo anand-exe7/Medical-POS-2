@@ -20,7 +20,8 @@ import {
 import type { Batch, CartLine, HeldBill, MedicineWithBatches, PaymentMethod } from "@/lib/types";
 import { calcBillTotals, calcDiscountPercent, round2 } from "@/lib/calc";
 import { amount, money, monthShort, unitNoun, todayIso } from "@/lib/format";
-import { listHeldBills, peekBillNo, saveHeldBills, submitBill } from "@/lib/store";
+import { listHeldBills, saveHeldBills } from "@/lib/store";
+import { submitBill } from "@/lib/actions";
 import { Button, Card, Pill, ScheduleBadge, ScreenHeading, Select } from "./ui";
 import { CustomerModal } from "./CustomerModal";
 
@@ -78,7 +79,7 @@ export const Billing = ({
   const [notice, setNotice] = useState("");
 
   /* Both come from the store, which re-renders this screen on every write. */
-  const billNo = peekBillNo();
+
   const held = listHeldBills();
 
   useEffect(() => {
@@ -229,7 +230,7 @@ export const Billing = ({
     setCustomerOpen(true);
   };
 
-  const finishBill = (customer: {
+  const finishBill = async (customer: {
     id: string | null;
     name: string;
     phone: string;
@@ -237,17 +238,20 @@ export const Billing = ({
     doctor: string;
     quickBill: boolean;
   }) => {
-    const bill = submitBill({
+    const billId = await submitBill({
       lines,
-      customer,
-      billDate,
-      receivedAmount: receivedNum,
-      paymentMethod: payment,
+      customer_id: customer.id,
+      customer_name: customer.name,
+      customer_phone: customer.phone,
+      customer_address: customer.address,
+      doctor_name: customer.doctor,
+      received_amount: receivedNum,
+      payment_method: payment,
     });
     setCustomerOpen(false);
     clearBill();
     onDone();
-    window.open(`/invoice/${bill.id}?print=1`, "_blank");
+    window.open(`/invoice/${billId}?print=1`, "_blank");
   };
 
   /* ----------------------------- keyboard ops ---------------------------- */
@@ -575,7 +579,7 @@ export const Billing = ({
               Current Bill
             </h3>
             <p className="text-[12px] font-semibold text-gray-600">
-              Bill No: <span className="text-gray-900">{billNo}</span>
+              Bill No: <span className="text-gray-900">Auto-Generated</span>
             </p>
           </div>
 
