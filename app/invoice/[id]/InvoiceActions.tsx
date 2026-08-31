@@ -1,10 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Printer, Copy, Check } from "lucide-react";
 
 export function InvoiceActions() {
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const search = new URLSearchParams(window.location.search);
+      if (search.get("print") === "1") {
+        const timer = setTimeout(() => window.print(), 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, []);
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {

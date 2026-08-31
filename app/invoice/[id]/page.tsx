@@ -1,46 +1,20 @@
-"use client";
-
-import { use, useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { MapPin, Phone } from "lucide-react";
-import { getBill, getServerVersion, getSettings, getVersion, subscribe } from "@/lib/store";
+import { getBill, getSettings } from "@/lib/db/queries";
 import { amount, dateLong, money, monthShort, timeLabel } from "@/lib/format";
 import { InvoiceActions } from "./InvoiceActions";
 
-export default function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
-
-  /* Bills live in browser storage; -1 is the server snapshot, where there is
-     nothing to read yet. */
-  const version = useSyncExternalStore(subscribe, getVersion, getServerVersion);
-  const loaded = version >= 0;
-  const bill = loaded ? getBill(id) : null;
-  const shop = loaded ? getSettings() : null;
-
-  /* Auto-print when the POS opens the invoice with ?print=1 */
-  useEffect(() => {
-    if (!loaded || !bill) return;
-    if (new URLSearchParams(window.location.search).get("print") !== "1") return;
-    const timer = setTimeout(() => window.print(), 500);
-    return () => clearTimeout(timer);
-  }, [loaded, bill]);
-
-  if (!loaded) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <p className="animate-pulse text-[12px] font-bold uppercase tracking-[0.2em] text-[#0a6127]">
-          Loading bill…
-        </p>
-      </div>
-    );
-  }
+export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const bill = await getBill(id);
+  const shop = await getSettings();
 
   if (!bill) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-4 text-center">
         <p className="text-xl font-bold text-[#0a6127]">Bill Not Found</p>
         <p className="max-w-sm text-[13px] text-gray-500">
-          Bills are stored on the device that created them, so this link only opens on that browser.
+          Bill ID &quot;{id}&quot; was not found in the database.
         </p>
         <Link
           href="/"

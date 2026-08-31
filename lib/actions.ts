@@ -4,7 +4,7 @@ import { db } from "./db/client";
 import * as schema from "./db/schema";
 import { eq, sql } from "drizzle-orm";
 import { generateBillId, formatCustomerId } from "./ids";
-import { calcBillTotals } from "./calc";
+import { calcBillTotals, round2 } from "./calc";
 
 export async function saveMedicine(payload: any) {
   if (payload.id && !payload.id.startsWith("id-")) {
@@ -223,6 +223,14 @@ export async function submitBill(payload: {
     await tx.insert(schema.bills).values(newBill);
 
     for (const line of payload.lines) {
+      const mrpPerUnit = Number(line.mrp_per_unit || 0);
+      const perUnitPrice = Number(line.per_unit_price || 0);
+      const qty = Number(line.qty || 0);
+      const lineMrp = line.line_mrp ?? round2(mrpPerUnit * qty);
+      const lineAmount = line.line_amount ?? round2(perUnitPrice * qty);
+      const lineDiscount = line.line_discount ?? round2(lineMrp - lineAmount);
+      const gstPercent = Number(line.gst_percent || 0);
+
       await tx.insert(schema.billItems).values({
         billId,
         medicineId: line.medicine_id,
@@ -238,13 +246,13 @@ export async function submitBill(payload: {
         box: line.box,
         purchaseUnitType: line.purchase_unit_type,
         packSize: line.pack_size,
-        qty: line.qty,
-        mrpPerUnit: line.mrp_per_unit.toString(),
-        perUnitPrice: line.per_unit_price.toString(),
-        lineMrp: line.line_mrp.toString(),
-        lineAmount: line.line_amount.toString(),
-        lineDiscount: line.line_discount.toString(),
-        gstPercent: line.gst_percent.toString(),
+        qty: qty,
+        mrpPerUnit: mrpPerUnit.toString(),
+        perUnitPrice: perUnitPrice.toString(),
+        lineMrp: lineMrp.toString(),
+        lineAmount: lineAmount.toString(),
+        lineDiscount: lineDiscount.toString(),
+        gstPercent: gstPercent.toString(),
       });
 
       // Deduct stock
