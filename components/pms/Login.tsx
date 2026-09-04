@@ -28,7 +28,7 @@ export const Login = ({
       <div className="w-full max-w-[400px]">
         <div className="mb-6 flex flex-col items-center gap-3 rounded-2xl bg-white px-6 py-5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Makkal Marundhagam" className="h-16 w-16 object-contain" />
+          <img src="/logo.jpeg" alt="Makkal Marundhagam" className="h-16 w-16 object-contain" />
           <div className="text-center">
             <p className="text-[19px] font-extrabold leading-tight tracking-tight text-[#0a6127]">
               MAKKAL MARUNDHAGAM

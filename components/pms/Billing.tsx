@@ -263,7 +263,7 @@ export const Billing = ({
       } else if (event.key === "F6") {
         event.preventDefault();
         holdBill();
-      } else if (event.key === "F12") {
+      } else if (event.key === "F12" || event.key === "F11") {
         event.preventDefault();
         startCheckout();
       }
@@ -776,7 +776,7 @@ export const Billing = ({
             <CreditCard className="h-[18px] w-[18px]" /> Pay &amp; Print (F12)
           </button>
 
-          <div className="relative mt-3 grid grid-cols-3 gap-2">
+          <div className="relative mt-3 grid grid-cols-2 gap-2">
             <button
               onClick={holdBill}
               className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-[#e3e7ea] px-1 py-2.5 text-[11.5px] font-semibold text-gray-700 transition hover:bg-gray-50"
@@ -786,17 +786,6 @@ export const Billing = ({
                 Hold Bill
                 <br />
                 (F6)
-              </span>
-            </button>
-            <button
-              onClick={() => window.print()}
-              className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-[#e3e7ea] px-1 py-2.5 text-[11.5px] font-semibold text-gray-700 transition hover:bg-gray-50"
-            >
-              <Printer className="h-4 w-4 text-gray-600" />
-              <span className="leading-tight">
-                Print Bill
-                <br />
-                (F11)
               </span>
             </button>
             <button
@@ -818,6 +807,7 @@ export const Billing = ({
                 </p>
                 <input
                   type="date"
+                  max={todayIso()}
                   value={billDate}
                   onChange={(e) => setBillDate(e.target.value)}
                   className="field mb-3"

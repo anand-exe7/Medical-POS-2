@@ -25,12 +25,12 @@ export type ScreenKey =
 
 /** The eight screens the client asked for (slide 2) */
 export const NAV_ITEMS: { key: ScreenKey; label: string; icon: React.ReactNode; adminOnly?: boolean }[] = [
-  { key: "dashboard", label: "Dashboard", icon: <LayoutGrid className="h-[19px] w-[19px]" /> },
+  { key: "dashboard", label: "Dashboard", icon: <LayoutGrid className="h-[19px] w-[19px]" />, adminOnly: true },
   { key: "billing", label: "Billing (POS)", icon: <ShoppingCart className="h-[19px] w-[19px]" /> },
   { key: "purchase", label: "Purchase", icon: <Truck className="h-[19px] w-[19px]" />, adminOnly: true },
   { key: "inventory", label: "Inventory", icon: <PackageSearch className="h-[19px] w-[19px]" /> },
   { key: "customers", label: "Customers", icon: <Users className="h-[19px] w-[19px]" /> },
-  { key: "reports", label: "Reports", icon: <BarChart3 className="h-[19px] w-[19px]" />, adminOnly: true },
+  { key: "reports", label: "Reports", icon: <BarChart3 className="h-[19px] w-[19px]" /> },
   { key: "expiry", label: "Expiry Alert", icon: <BellRing className="h-[19px] w-[19px]" /> },
   { key: "settings", label: "Settings", icon: <SettingsIcon className="h-[19px] w-[19px]" />, adminOnly: true },
 ];
@@ -78,7 +78,7 @@ export const Sidebar = ({
           </button>
           <div className="flex items-center gap-2.5 rounded-xl bg-white px-3 py-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Makkal Marundhagam" className="h-11 w-11 shrink-0 object-contain" />
+            <img src="/logo.jpeg" alt="Makkal Marundhagam" className="h-11 w-11 shrink-0 object-contain" />
             <div className="min-w-0 leading-none">
               <p className="text-[15px] font-extrabold leading-[1.1] tracking-tight text-[#0a6127]">
                 MAKKAL
@@ -121,7 +121,7 @@ export const Sidebar = ({
         {/* Footer */}
         <div className="flex items-center gap-2.5 border-t border-white/10 px-5 py-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="" className="h-7 w-7 object-contain opacity-90" />
+          <img src="/logo.jpeg" alt="" className="h-7 w-7 object-contain opacity-90" />
           <div className="leading-tight">
             <p className="text-[11.5px] font-semibold text-white/90">Makkal Marundhagam</p>
             <p className="text-[10.5px] text-white/45">v1.0.0</p>

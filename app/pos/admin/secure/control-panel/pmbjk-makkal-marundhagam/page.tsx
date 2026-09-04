@@ -206,8 +206,8 @@ export default function PharmacyManagementSystem() {
             <Customers customers={customers} bills={bills} onChanged={notify} role={role} />
           )}
 
-          {screen === "reports" && role === "admin" && (
-            <Reports bills={bills} batchRows={batchRows} onChanged={notify} />
+          {screen === "reports" && (
+            <Reports bills={bills} batchRows={batchRows} onChanged={notify} role={role} />
           )}
 
           {screen === "expiry" && <ExpiryAlert rows={batchRows} />}

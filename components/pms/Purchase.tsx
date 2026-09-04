@@ -17,7 +17,7 @@ import { Button, Card, Field, ScreenHeading, Select, TextInput } from "./ui";
 
 /** Dropdown options requested by the client (slide 9 / 10) */
 const PURCHASE_UNITS: PurchaseUnitType[] = ["Strip", "Piece", "Bottle"];
-const SCHEDULES: DrugSchedule[] = ["H", "H1", "X", "NRX", "OTC"];
+const SCHEDULES: DrugSchedule[] = ["H", "H1", "X", "NRX", "OTC", "General"];
 
 const blankForm = () => ({
   supplierId: "",

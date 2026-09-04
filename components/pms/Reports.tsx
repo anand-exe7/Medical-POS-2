@@ -43,10 +43,12 @@ export const Reports = ({
   bills,
   batchRows,
   onChanged,
+  role = "admin",
 }: {
   bills: Bill[];
   batchRows: any[];
   onChanged: (message?: string) => void;
+  role?: string;
 }) => {
   const [period, setPeriod] = useState<Period>("MONTH");
   const [from, setFrom] = useState(todayIso());
@@ -255,18 +257,20 @@ export const Reports = ({
                       >
                         <Printer className="h-4 w-4" />
                       </button>
-                      <button
-                        onClick={async () => {
-                          if (confirm(`Delete bill ${bill.id}?`)) {
-                            await deleteBill(bill.id);
-                            onChanged(`Bill ${bill.id} deleted.`);
-                          }
-                        }}
-                        aria-label="Delete bill"
-                        className="cursor-pointer rounded-md p-1.5 text-gray-500 transition hover:bg-red-50 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {role === "admin" && (
+                        <button
+                          onClick={async () => {
+                            if (confirm(`Delete bill ${bill.id}?`)) {
+                              await deleteBill(bill.id);
+                              onChanged(`Bill ${bill.id} deleted.`);
+                            }
+                          }}
+                          aria-label="Delete bill"
+                          className="cursor-pointer rounded-md p-1.5 text-gray-500 transition hover:bg-red-50 hover:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -318,7 +322,6 @@ export const Reports = ({
                 <thead>
                   <tr className="bg-[#f4f6f8] text-gray-700">
                     <th className="th">Product</th>
-                    <th className="th">Box</th>
                     <th className="th">Batch</th>
                     <th className="th">EXP DT</th>
                     <th className="th text-center">Quantity</th>
@@ -333,7 +336,6 @@ export const Reports = ({
                         {item.generic_name}
                         <span className="ml-1.5 text-[11.5px] text-gray-500">{item.brand_name}</span>
                       </td>
-                      <td className="td">{item.box || "-"}</td>
                       <td className="td">{item.batch_no}</td>
                       <td className="td">{monthShort(item.exp_date)}</td>
                       <td className="td text-center">{item.qty}</td>
