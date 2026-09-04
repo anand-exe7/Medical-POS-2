@@ -25,7 +25,7 @@ import { downloadCsv, downloadExcel } from "@/lib/xlsx";
 import { Button, Card, Field, Modal, PageTitle, Pill, Select, StatTile, TextInput } from "./ui";
 
 const PAGE_SIZE = 8;
-const SCHEDULES: DrugSchedule[] = ["H", "H1", "X", "NRX", "OTC"];
+const SCHEDULES: DrugSchedule[] = ["H", "H1", "X", "NRX", "OTC", "General"];
 const PURCHASE_UNITS: PurchaseUnitType[] = ["Strip", "Piece", "Bottle"];
 
 export const Inventory = ({

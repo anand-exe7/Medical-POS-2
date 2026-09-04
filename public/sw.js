@@ -2,7 +2,7 @@ const CACHE_NAME = 'pmbjk-makkal-marundhagam-pos-v1';
 const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json',
-  '/logo.png',
+  '/logo.jpeg',
   '/icon.png',
   '/pos/admin/secure/control-panel/pmbjk-makkal-marundhagam'
 ];

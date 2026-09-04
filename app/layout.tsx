@@ -28,8 +28,8 @@ export const metadata: Metadata = {
     title: "PMBJK MAKKAL MARUNDHAGAM",
   },
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/logo.jpeg",
+    apple: "/logo.jpeg",
   },
 };
 
@@ -49,7 +49,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="PMBJK MAKKAL MARUNDHAGAM" />
-        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="apple-touch-icon" href="/logo.jpeg" />
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}

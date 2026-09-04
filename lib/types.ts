@@ -3,8 +3,8 @@
    Data model
    ========================================================================== */
 
-/** Regulatory drug schedule (client spec: H, H1, X, NRX, OTC) */
-export type DrugSchedule = "H" | "H1" | "X" | "NRX" | "OTC";
+/** Regulatory drug schedule (client spec: H, H1, X, NRX, OTC, General) */
+export type DrugSchedule = "H" | "H1" | "X" | "NRX" | "OTC" | "General";
 
 /** How the medicine is purchased from the supplier */
 export type PurchaseUnitType = "Strip" | "Piece" | "Bottle";

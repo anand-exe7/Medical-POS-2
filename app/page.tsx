@@ -7,7 +7,7 @@ export default function Home() {
       <header className="border-b border-black/10 py-6 px-6 sm:px-12 flex justify-center items-center bg-white/90 backdrop-blur-md sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-xs p-1 border border-[#0a6127]/30">
-            <img src="/logo.png" alt="PMBJK MAKKAL MARUNDHAGAM Logo" className="w-full h-full object-contain" />
+            <img src="/logo.jpeg" alt="PMBJK MAKKAL MARUNDHAGAM Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <span className="text-sm font-black text-[#0a6127] tracking-wider uppercase block">

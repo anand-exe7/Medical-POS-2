@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { MapPin, Phone } from "lucide-react";
 import { getBill, getSettings } from "@/lib/db/queries";
 import { amount, dateLong, money, monthShort, timeLabel } from "@/lib/format";
 import { InvoiceActions } from "./InvoiceActions";
@@ -28,151 +27,136 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-[#f7f8fa] px-4 py-8 print:bg-white print:p-0">
-      <style>{`@media print { @page { margin: 10mm; } body { background: #fff !important; } }`}</style>
+      <style>{`
+        @media print {
+          @page { margin: 0; width: 80mm; }
+          body { 
+            background: #fff !important; 
+            width: 80mm !important; 
+            margin: 0 !important;
+            padding: 0 !important;
+            font-family: monospace, sans-serif !important;
+          }
+        }
+      `}</style>
 
-      <div className="mb-5 flex w-full max-w-3xl justify-end no-print">
+      <div className="mb-5 flex w-full max-w-sm justify-end no-print">
         <InvoiceActions />
       </div>
 
-      <div className="w-full max-w-3xl overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white print:rounded-none print:border-0">
+      <div className="w-[80mm] overflow-hidden bg-white px-4 py-4 print:w-[80mm] print:px-2 print:py-2 text-black font-mono mx-auto text-xs">
         {/* Header */}
-        <div className="flex flex-col items-center border-b border-[#eceff2] px-8 py-7 text-center">
+        <div className="flex flex-col items-center border-b border-black pb-3 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="" className="mb-2.5 h-16 w-16 object-contain" />
-          <h1 className="text-[22px] font-extrabold tracking-tight text-[#0a6127]">
+          <img src="/logo.jpeg" alt="" className="mb-2 h-12 w-12 object-contain grayscale" />
+          <h1 className="text-[13px] font-bold uppercase">
             {shop?.shop_name || "PMBJK MAKKAL MARUNDHAGAM"}
           </h1>
-          <p className="mt-1 flex items-center gap-1.5 text-[12.5px] text-gray-600">
-            <MapPin className="h-3.5 w-3.5 text-[#0a6127]" /> {shop?.address}
+          <p className="mt-1 text-[10px] leading-tight max-w-[200px]">
+            {shop?.address}
           </p>
-          <p className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-gray-600">
-            <Phone className="h-3.5 w-3.5 text-[#0a6127]" /> {shop?.phone}
+          <p className="mt-1 text-[10px]">
+            Ph: {shop?.phone}
           </p>
-          <p className="mt-1.5 text-[11.5px] text-gray-500">
-            GSTIN: {shop?.gstin} · DL No: {shop?.dl_no}
-          </p>
+          {(shop?.gstin || shop?.dl_no) && (
+            <p className="mt-1 text-[9px]">
+              {shop?.gstin && `GSTIN: ${shop?.gstin} `}
+              {shop?.dl_no && `DL No: ${shop?.dl_no}`}
+            </p>
+          )}
         </div>
 
         {/* Meta */}
-        <div className="grid grid-cols-1 gap-6 border-b border-[#eceff2] px-8 py-5 sm:grid-cols-2">
-          <div>
-            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500">
-              Billed To
-            </p>
-            <p className="text-[15px] font-bold text-gray-900">
-              {bill.customer_name || "Walk-in Customer"}
-            </p>
-            {bill.customer_phone && (
-              <p className="text-[13px] text-gray-600">+91 {bill.customer_phone}</p>
-            )}
-            {bill.customer_address && (
-              <p className="text-[12.5px] text-gray-500">{bill.customer_address}</p>
-            )}
-            {bill.doctor_name && (
-              <p className="mt-1 text-[12.5px] text-gray-600">Doctor: {bill.doctor_name}</p>
-            )}
-            {bill.customer_id && (
-              <p className="mt-1 text-[12px] text-gray-500">Customer ID: {bill.customer_id}</p>
-            )}
+        <div className="border-b border-black py-3 text-[10px] leading-tight">
+          <div className="flex justify-between mb-1">
+            <span className="font-bold">Bill No:</span>
+            <span>{bill.id}</span>
           </div>
-          <div className="sm:text-right">
-            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500">
-              Bill Details
-            </p>
-            <p className="text-[15px] font-bold text-gray-900">Bill No: {bill.id}</p>
-            <p className="text-[13px] text-gray-600">{dateLong(bill.bill_date)}</p>
-            <p className="text-[12.5px] text-gray-500">{timeLabel(bill.created_at)}</p>
-            <p className="mt-1 text-[12.5px] text-gray-600">Payment: {bill.payment_method}</p>
+          <div className="flex justify-between mb-1">
+            <span className="font-bold">Date:</span>
+            <span>{dateLong(bill.bill_date)} {timeLabel(bill.created_at)}</span>
+          </div>
+          <div className="flex justify-between mb-1">
+            <span className="font-bold">Billed To:</span>
+            <span>{bill.customer_name || "Walk-in Customer"}</span>
+          </div>
+          {bill.customer_phone && (
+            <div className="flex justify-between mb-1">
+              <span className="font-bold">Mobile:</span>
+              <span>+91 {bill.customer_phone}</span>
+            </div>
+          )}
+          {bill.doctor_name && (
+            <div className="flex justify-between mb-1">
+              <span className="font-bold">Doctor:</span>
+              <span>{bill.doctor_name}</span>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <span className="font-bold">Payment:</span>
+            <span>{bill.payment_method}</span>
           </div>
         </div>
 
-        {/* Items */}
-        <div className="px-8 py-5">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px]">
-              <thead>
-                <tr className="border-b-2 border-[#e6ebe8] text-left">
-                  <th className="py-2.5 text-[11px] font-bold uppercase tracking-wide text-gray-600">
-                    Product
-                  </th>
-                  <th className="py-2.5 text-center text-[11px] font-bold uppercase tracking-wide text-gray-600">
-                    Box
-                  </th>
-                  <th className="py-2.5 text-center text-[11px] font-bold uppercase tracking-wide text-gray-600">
-                    Batch / EXP
-                  </th>
-                  <th className="py-2.5 text-center text-[11px] font-bold uppercase tracking-wide text-gray-600">
-                    Qty
-                  </th>
-                  <th className="py-2.5 text-right text-[11px] font-bold uppercase tracking-wide text-gray-600">
-                    Per unit price
-                  </th>
-                  <th className="py-2.5 text-right text-[11px] font-bold uppercase tracking-wide text-gray-600">
-                    Selling price (₹)
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#f1f3f5]">
-                {bill.items.map((item) => (
-                  <tr key={item.id}>
-                    <td className="py-3 pr-3">
-                      <p className="text-[13px] font-semibold text-gray-900">{item.generic_name}</p>
-                      <p className="text-[11px] text-gray-500">
-                        {item.brand_name} · {item.manufacturer} · HSN {item.hsn_code}
-                      </p>
-                    </td>
-                    <td className="py-3 text-center text-[12.5px] text-gray-700">
-                      {item.box || "-"}
-                    </td>
-                    <td className="py-3 text-center text-[11.5px] text-gray-600">
-                      {item.batch_no}
-                      <br />
-                      {monthShort(item.exp_date)}
-                    </td>
-                    <td className="py-3 text-center text-[13px] font-semibold text-gray-900">
-                      {item.qty}
-                    </td>
-                    <td className="py-3 text-right text-[13px] text-gray-800">
-                      {amount(item.per_unit_price)}
-                    </td>
-                    <td className="py-3 text-right text-[13px] font-bold text-gray-900">
-                      {amount(item.line_amount)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {/* Items Header */}
+        <div className="border-b border-black py-1.5 flex text-[10px] font-bold">
+          <div className="w-[15%]">Qty</div>
+          <div className="w-[50%]">Item</div>
+          <div className="w-[15%] text-right">Price</div>
+          <div className="w-[20%] text-right">Total</div>
+        </div>
+
+        {/* Items List */}
+        <div className="border-b border-black py-2">
+          {bill.items.map((item) => (
+            <div key={item.id} className="mb-2 text-[10px] flex items-start">
+              <div className="w-[15%] font-bold">{item.qty}</div>
+              <div className="w-[50%] pr-1 leading-tight">
+                <span className="font-bold">{item.generic_name}</span>
+                <br />
+                <span className="text-[9px]">
+                  Batch: {item.batch_no} | EXP: {monthShort(item.exp_date)}
+                </span>
+              </div>
+              <div className="w-[15%] text-right">{amount(item.per_unit_price)}</div>
+              <div className="w-[20%] text-right font-bold">{amount(item.line_amount)}</div>
+            </div>
+          ))}
         </div>
 
         {/* Totals */}
-        <div className="flex justify-end border-t border-[#eceff2] px-8 py-5">
-          <div className="w-full max-w-[300px] space-y-2 text-[13px]">
-            <Row label={`Sub Total (${bill.items.length} Items)`} value={money(bill.sub_total)} />
-            <Row label="Discount" value={money(bill.discount)} green />
-            <Row label="Taxable Amount" value={money(bill.taxable_amount)} />
-            <Row label={`GST (${bill.gst_percent}%)`} value={money(bill.gst_amount)} />
-            <div className="flex items-center justify-between border-t border-[#e6ebe8] pt-3">
-              <span className="text-[15px] font-bold text-gray-900">TOTAL</span>
-              <span className="text-[22px] font-extrabold text-[#0a6127]">
-                {money(bill.grand_total)}
-              </span>
-            </div>
+        <div className="border-b border-black py-3 text-[10px] space-y-1">
+          <Row label={`Sub Total (${bill.items.length} Items)`} value={money(bill.sub_total)} />
+          {bill.discount > 0 && (
+            <Row label="Discount" value={`-${money(bill.discount)}`} />
+          )}
+          <Row label="Taxable Amount" value={money(bill.taxable_amount)} />
+          <Row label={`GST (${bill.gst_percent}%)`} value={money(bill.gst_amount)} />
+          
+          <div className="flex items-center justify-between pt-1 mt-1 border-t border-dashed border-black">
+            <span className="text-[12px] font-bold">TOTAL</span>
+            <span className="text-[14px] font-bold">
+              {money(bill.grand_total)}
+            </span>
+          </div>
+          
+          <div className="pt-2">
             <Row label="Received" value={money(bill.received_amount)} />
-            <Row label="Change" value={money(bill.change_amount)} green />
+            {bill.change_amount > 0 && (
+              <Row label="Change" value={money(bill.change_amount)} />
+            )}
           </div>
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#eceff2] bg-[#fafbfc] px-8 py-5 text-center">
-          <p className="text-[12px] font-bold uppercase tracking-wide text-[#0a6127]">
+        <div className="pt-4 text-center text-[9px] leading-tight">
+          <p className="font-bold uppercase text-[11px] mb-1">
             Thank you for shopping!
           </p>
-          <p className="mt-1 text-[11px] text-gray-500">
-            GST is included in the MRP and selling price. The GST % indicates the applicable tax rate
-            only.
+          <p className="mb-2">
+            GST is included in MRP. The GST % indicates applicable tax rate only.
           </p>
-          <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.15em] text-gray-400">
+          <p className="font-bold uppercase">
             Powered by Cenexa Systems
           </p>
         </div>
@@ -181,9 +165,9 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   );
 }
 
-const Row = ({ label, value, green }: { label: string; value: string; green?: boolean }) => (
+const Row = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-center justify-between">
-    <span className="text-gray-600">{label}</span>
-    <span className={`font-semibold ${green ? "text-[#0a6127]" : "text-gray-900"}`}>{value}</span>
+    <span>{label}</span>
+    <span>{value}</span>
   </div>
 );
