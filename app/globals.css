@@ -77,6 +77,11 @@ input[type="number"] {
     @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[#d8dde3] bg-white
            px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50;
   }
+}
+
+/* Table cells live in the components layer so per-column utilities such as
+   `text-right` / `text-center` on a <th> still win over the default alignment. */
+@layer components {
   .th {
     @apply px-2.5 py-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-gray-600;
   }

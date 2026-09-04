@@ -117,7 +117,7 @@ export const Purchase = ({
   const stockAdded = calcStockAdded(packSize, quantity);
   const total = calcTotal(mrp, quantity);
   const perUnitPrice = calcPerUnitPrice(sellingPrice, packSize);
-  const discount = calcDiscount(mrp, sellingPrice);
+  const discount = mrp > 0 && sellingPrice > 0 ? calcDiscount(mrp, sellingPrice) : 0;
   const purchaseCost = calcPurchaseCost(purchaseRate, quantity);
   const unitWord = unitNoun(form.purchaseUnitType, packSize);
 
@@ -348,17 +348,29 @@ export const Purchase = ({
         {/* Purchase calculation */}
         <p className="mb-2 mt-6 text-[13px] font-semibold text-gray-800">Purchase Calculation</p>
         <div className="overflow-x-auto rounded-lg border border-[#e5e7eb]">
-          <table className="w-full min-w-[980px]">
+          <table className="w-full min-w-[1120px]">
             <thead>
+              <tr className="bg-[#eaeef1]">
+                <th className={GROUP_TH} colSpan={3}>
+                  Stock
+                </th>
+                <th className={`${GROUP_TH} border-l border-[#d3d9df]`} colSpan={2}>
+                  You pay — supplier
+                </th>
+                <th className={`${GROUP_TH} border-l border-[#d3d9df]`} colSpan={6}>
+                  Customer pays — retail
+                </th>
+              </tr>
               <tr className="bg-[#f4f6f8] text-gray-700">
                 <th className="th">Purchase Unit</th>
                 <th className="th">Quantity</th>
                 <th className="th bg-[#eef4ef]">Stock Added</th>
-                <th className="th">Purchase Rate (₹)</th>
-                <th className="th">MRP (₹)</th>
-                <th className="th bg-[#eef4ef]">Total (₹)</th>
+                <th className="th border-l border-[#d3d9df]">Purchase Rate (₹)</th>
+                <th className="th bg-[#eef4ef]">Purchase Total (₹)</th>
+                <th className="th border-l border-[#d3d9df]">MRP (₹)</th>
+                <th className="th bg-[#eef4ef]">MRP Total (₹)</th>
+                <th className="th">Selling Price (₹)</th>
                 <th className="th bg-[#eef4ef]">Per unit price</th>
-                <th className="th">Selling price (₹)</th>
                 <th className="th">GST %</th>
                 <th className="th bg-[#eef4ef]">Discount</th>
               </tr>
@@ -383,16 +395,24 @@ export const Purchase = ({
                   onChange={(v) => set("purchaseRate", v)}
                   type="number"
                   placeholder="20"
+                  divider
                 />
-                <CellInput value={form.mrp} onChange={(v) => set("mrp", v)} type="number" placeholder="60" />
+                <CellReadonly value={purchaseCost ? amount(purchaseCost) : "—"} />
+                <CellInput
+                  value={form.mrp}
+                  onChange={(v) => set("mrp", v)}
+                  type="number"
+                  placeholder="60"
+                  divider
+                />
                 <CellReadonly value={total ? amount(total) : "—"} />
-                <CellReadonly value={perUnitPrice ? amount(perUnitPrice) : "—"} />
                 <CellInput
                   value={form.sellingPrice}
                   onChange={(v) => set("sellingPrice", v)}
                   type="number"
                   placeholder="40"
                 />
+                <CellReadonly value={perUnitPrice ? amount(perUnitPrice) : "—"} />
                 <CellInput value={form.gst} onChange={(v) => set("gst", v)} type="number" placeholder="12" />
                 <CellReadonly value={discount ? amount(discount) : "—"} tone="green" />
               </tr>
@@ -401,15 +421,18 @@ export const Purchase = ({
         </div>
 
         <p className="mt-2 text-[11.5px] text-gray-500">
-          Stock Added, Total, Per unit price and Discount are calculated automatically. Purchase
-          Unit, Quantity, Purchase Rate, MRP, Selling Price and GST % are the input fields.
+          The shaded columns fill in on their own — Stock Added, Purchase Total, MRP Total, Per unit
+          price and Discount. Every other column is typed in.
         </p>
 
         {/* Totals strip */}
         <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-[#e5e7eb] bg-[#e5e7eb] sm:grid-cols-4">
           <SummaryCell label={`Total ${form.purchaseUnitType}s`} value={quantity ? String(quantity) : "—"} />
-          <SummaryCell label="Total Purchase Cost" value={purchaseCost ? `₹ ${amount(purchaseCost)}` : "—"} />
-          <SummaryCell label="Bill Total (MRP)" value={total ? `₹ ${amount(total)}` : "—"} />
+          <SummaryCell
+            label="Purchase Total (you pay)"
+            value={purchaseCost ? `₹ ${amount(purchaseCost)}` : "—"}
+          />
+          <SummaryCell label="MRP Total (retail value)" value={total ? `₹ ${amount(total)}` : "—"} />
           <SummaryCell
             label={`Total ${unitWord} Added`}
             value={stockAdded ? String(stockAdded) : "—"}
@@ -462,18 +485,23 @@ export const Purchase = ({
 
 /* ------------------------------ table cells ------------------------------ */
 
+const GROUP_TH =
+  "px-2.5 py-2 text-center text-[10.5px] font-bold uppercase tracking-[0.09em] text-gray-500";
+
 const CellInput = ({
   value,
   onChange,
   placeholder,
   type = "text",
+  divider,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
+  divider?: boolean;
 }) => (
-  <td className="border-t border-[#eef1f3] px-2 py-2">
+  <td className={`border-t border-[#eef1f3] px-2 py-2 ${divider ? "border-l border-l-[#d3d9df]" : ""}`}>
     <input
       value={value}
       type={type}
