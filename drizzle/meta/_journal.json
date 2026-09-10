@@ -8,6 +8,13 @@
       "when": 1788158991199,
       "tag": "0000_fair_wendigo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789042651973,
+      "tag": "0001_add_brand_manufacturer_to_batches",
+      "breakpoints": true
     }
   ]
 }

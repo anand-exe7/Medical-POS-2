@@ -119,6 +119,8 @@ const buildSeed = (): Store => {
       id: uid(),
       medicine_id: medicineId,
       supplier_id: suppliers[0].id,
+      brand_name: row.brand,
+      manufacturer: row.maker,
       invoice_no: "INV-2456",
       purchase_date: created.slice(0, 10),
       batch_no: row.batchNo,

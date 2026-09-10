@@ -48,6 +48,10 @@ export const batches = pgTable(
       .notNull()
       .references(() => medicines.id, { onDelete: "cascade" }),
     supplierId: uuid("supplier_id").references(() => suppliers.id, { onDelete: "set null" }),
+    /** Brand name for this specific batch / purchase (e.g. "Azicip") */
+    brandName: text("brand_name").notNull().default(""),
+    /** Manufacturer for this specific batch (e.g. "Cipla Ltd") */
+    manufacturer: text("manufacturer").notNull().default(""),
     invoiceNo: text("invoice_no").notNull().default(""),
     purchaseDate: date("purchase_date").notNull(),
     batchNo: text("batch_no").notNull(),

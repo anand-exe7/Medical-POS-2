@@ -42,7 +42,7 @@ export const ExpiryAlert = ({ rows }: { rows: BatchRow[] }) => {
     return active.filter(
       ({ batch, medicine }) =>
         medicine.generic_name.toLowerCase().includes(q) ||
-        medicine.brand_name.toLowerCase().includes(q) ||
+        batch.brand_name.toLowerCase().includes(q) ||
         batch.batch_no.toLowerCase().includes(q) ||
         batch.box.toLowerCase().includes(q),
     );
@@ -70,7 +70,7 @@ export const ExpiryAlert = ({ rows }: { rows: BatchRow[] }) => {
           rows: filtered.map(({ batch, medicine }, index) => [
             index + 1,
             medicine.generic_name,
-            medicine.brand_name,
+            batch.brand_name || medicine.brand_name,
             medicine.schedule,
             batch.box,
             batch.batch_no,

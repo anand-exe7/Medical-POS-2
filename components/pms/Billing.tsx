@@ -96,11 +96,15 @@ export const Billing = ({
       .filter(
         (m) =>
           m.generic_name.toLowerCase().includes(q) ||
-          m.brand_name.toLowerCase().includes(q) ||
           m.salt.toLowerCase().includes(q) ||
-          m.manufacturer.toLowerCase().includes(q) ||
           m.hsn_code.includes(q) ||
-          m.batches.some((b) => b.batch_no.toLowerCase().includes(q)),
+          // Search through all batches for brand/manufacturer match
+          m.batches.some(
+            (b) =>
+              b.brand_name.toLowerCase().includes(q) ||
+              b.manufacturer.toLowerCase().includes(q) ||
+              b.batch_no.toLowerCase().includes(q),
+          ),
       )
       .slice(0, 8);
   }, [query, medicines]);
@@ -162,8 +166,9 @@ export const Billing = ({
           medicine_id: selected.id,
           batch_id: batch.id,
           generic_name: selected.generic_name,
-          brand_name: selected.brand_name,
-          manufacturer: selected.manufacturer,
+          // Brand / manufacturer come from the batch (source of truth)
+          brand_name: batch.brand_name || selected.brand_name,
+          manufacturer: batch.manufacturer || selected.manufacturer,
           salt: selected.salt,
           schedule: selected.schedule,
           hsn_code: selected.hsn_code,
@@ -344,7 +349,9 @@ export const Billing = ({
                       <span className="block truncate text-[14px] font-semibold text-gray-900">
                         {m.generic_name}
                         <span className="ml-2 text-[12px] font-medium text-gray-500">
-                          {m.brand_name} · {m.manufacturer}
+                          {/* Show all unique brands from batches */}
+                          {[...new Set(m.batches.map((b) => b.brand_name).filter(Boolean))].join(" / ")} ·{" "}
+                          {[...new Set(m.batches.map((b) => b.manufacturer).filter(Boolean))].join(" / ")}
                         </span>
                       </span>
                       <span className="mt-0.5 block truncate text-[11.5px] text-gray-500">
@@ -377,7 +384,7 @@ export const Billing = ({
                 </p>
                 <p className="mt-1.5 text-[12.5px] text-gray-600">Salt: {selected.salt}</p>
                 <p className="text-[12.5px] text-gray-600">
-                  Company: {selected.manufacturer} · Brand: {selected.brand_name}
+                  Company: {batch.manufacturer || selected.manufacturer} · Brand: {batch.brand_name || selected.brand_name}
                 </p>
                 <p className="text-[12.5px] text-gray-600">
                   Batch: <span className="font-semibold text-gray-800">{batch.batch_no}</span> · EXP
