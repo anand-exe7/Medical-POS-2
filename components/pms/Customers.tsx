@@ -106,7 +106,8 @@ export const Customers = ({
         />
       </div>
 
-      <Card className="overflow-hidden">
+      {/* Desktop / tablet table */}
+      <Card className="hidden overflow-hidden md:block">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px]">
             <thead>
@@ -189,6 +190,98 @@ export const Customers = ({
           </table>
         </div>
       </Card>
+
+      {/* Mobile card list */}
+      <div className="space-y-3 md:hidden">
+        {filtered.map(({ customer, bills: own, spend, last }, index) => (
+          <Card key={customer.id} className="p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="flex items-center gap-2 text-[11.5px] font-semibold text-gray-400">
+                  <span>#{index + 1}</span>
+                  <span className="font-bold text-[#1f6feb]">{customer.id}</span>
+                </p>
+                <p className="mt-1 flex flex-wrap items-center gap-2 text-[15px] font-bold text-gray-900">
+                  {customer.name || "—"}
+                  {customer.quick_bill && <Pill tone="green">QUICK BILL</Pill>}
+                </p>
+                <p className="mt-1 flex items-center gap-1.5 text-[12.5px] text-gray-600">
+                  <Phone className="h-3.5 w-3.5 text-gray-400" />
+                  {customer.phone || "—"}
+                </p>
+                {customer.address && (
+                  <p className="mt-1 flex items-start gap-1.5 text-[12.5px] leading-snug text-gray-600">
+                    <MapPin className="mt-[2px] h-3.5 w-3.5 shrink-0 text-gray-400" />
+                    <span className="break-words">{customer.address}</span>
+                  </p>
+                )}
+                {customer.doctor_name && (
+                  <p className="mt-1 text-[12.5px] text-gray-600">
+                    <span className="text-gray-400">Doctor:</span> {customer.doctor_name}
+                  </p>
+                )}
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1.5">
+                <button
+                  onClick={() => setSelected(customer)}
+                  aria-label="Purchase history"
+                  className="cursor-pointer rounded-md p-1.5 text-gray-500 transition hover:bg-gray-100 hover:text-[#0a6127]"
+                >
+                  <Receipt className="h-4 w-4" />
+                </button>
+                {role === "admin" && (
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setEditing(customer)}
+                      aria-label="Edit"
+                      className="cursor-pointer rounded-md p-1.5 text-gray-500 transition hover:bg-gray-100 hover:text-[#0a6127]"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (confirm(`Delete customer ${customer.name || customer.id}?`)) {
+                          await deleteCustomer(customer.id);
+                          onChanged("Customer deleted.");
+                        }
+                      }}
+                      aria-label="Delete"
+                      className="cursor-pointer rounded-md p-1.5 text-gray-500 transition hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2 border-t border-[#eef1f3] pt-3 text-center">
+              <div>
+                <p className="text-[10.5px] font-semibold uppercase tracking-wide text-gray-400">
+                  Bills
+                </p>
+                <p className="mt-0.5 text-[14px] font-bold text-gray-900">{own.length}</p>
+              </div>
+              <div>
+                <p className="text-[10.5px] font-semibold uppercase tracking-wide text-gray-400">
+                  Total
+                </p>
+                <p className="mt-0.5 text-[14px] font-bold text-[#0a6127]">₹{amount(spend)}</p>
+              </div>
+              <div>
+                <p className="text-[10.5px] font-semibold uppercase tracking-wide text-gray-400">
+                  Last
+                </p>
+                <p className="mt-0.5 text-[12.5px] font-semibold text-gray-700">
+                  {last ? dateSlash(last) : "—"}
+                </p>
+              </div>
+            </div>
+          </Card>
+        ))}
+        {!filtered.length && (
+          <Card className="py-14 text-center text-[13.5px] text-gray-400">No customers found.</Card>
+        )}
+      </div>
 
       {/* Purchase history */}
       <Modal

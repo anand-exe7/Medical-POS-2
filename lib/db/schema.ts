@@ -13,6 +13,7 @@ import {
 
 
 export const customerSeq = pgSequence("customer_seq", { startWith: 1 });
+export const billSeq = pgSequence("bill_seq", { startWith: 1 });
 
 export const suppliers = pgTable("suppliers", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -145,6 +146,7 @@ export const settings = pgTable("settings", {
   shopName: text("shop_name").notNull(),
   address: text("address").notNull(),
   phone: text("phone").notNull(),
+  email: text("email").notNull().default(""),
   gstin: text("gstin").notNull(),
   dlNo: text("dl_no").notNull(),
   defaultGst: numeric("default_gst", { precision: 5, scale: 2 }).notNull().default("12"),

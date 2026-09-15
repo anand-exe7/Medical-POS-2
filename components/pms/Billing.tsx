@@ -281,53 +281,46 @@ export const Billing = ({
           Billing ({batch ? saleNoun(batch.purchase_unit_type) : "Tablet"} Sale)
         </ScreenHeading>
 
-        {/* Search row */}
-        <div className="relative mb-3 flex gap-2.5">
-          <div className="relative flex-1">
-            <input
-              ref={searchRef}
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setShowResults(true);
-                setHighlight(0);
-              }}
-              onFocus={() => setShowResults(true)}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowDown") {
-                  e.preventDefault();
-                  setHighlight((h) => Math.min(h + 1, results.length - 1));
-                } else if (e.key === "ArrowUp") {
-                  e.preventDefault();
-                  setHighlight((h) => Math.max(0, h - 1));
-                } else if (e.key === "Enter" && results[highlight]) {
-                  e.preventDefault();
-                  chooseMedicine(results[highlight]);
-                } else if (e.key === "Escape") {
-                  setShowResults(false);
-                }
-              }}
-              placeholder="Type medicine name, brand, salt or batch no"
-              className="h-[46px] w-full rounded-lg border border-[#d8dde3] bg-white pl-4 pr-10 text-[15px] outline-none transition placeholder:text-gray-400 focus:border-[#0f7a31] focus:ring-2 focus:ring-[#0f7a31]/12"
-            />
-            {query && (
-              <button
-                onClick={clearSelection}
-                aria-label="Clear"
-                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-700"
-              >
-                <X className="h-[18px] w-[18px]" />
-              </button>
-            )}
-          </div>
-          <button
-            onClick={() => setShowResults(true)}
-            className="flex h-[46px] cursor-pointer items-center gap-2 rounded-lg bg-[#0a6127] px-5 text-[14px] font-semibold text-white transition hover:bg-[#0d7530]"
-          >
-            <Search className="h-4 w-4" /> Search
-          </button>
+        {/* Search row — one input; typing filters live, no separate button needed */}
+        <div className="relative mb-3">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-[17px] w-[17px] -translate-y-1/2 text-gray-400" />
+          <input
+            ref={searchRef}
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setShowResults(true);
+              setHighlight(0);
+            }}
+            onFocus={() => setShowResults(true)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setHighlight((h) => Math.min(h + 1, results.length - 1));
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setHighlight((h) => Math.max(0, h - 1));
+              } else if (e.key === "Enter" && results[highlight]) {
+                e.preventDefault();
+                chooseMedicine(results[highlight]);
+              } else if (e.key === "Escape") {
+                setShowResults(false);
+              }
+            }}
+            placeholder="Type medicine name, brand, salt or batch no"
+            className="h-[46px] w-full rounded-lg border border-[#d8dde3] bg-white pl-11 pr-10 text-[15px] outline-none transition placeholder:text-gray-400 focus:border-[#0f7a31] focus:ring-2 focus:ring-[#0f7a31]/12"
+          />
+          {query && (
+            <button
+              onClick={clearSelection}
+              aria-label="Clear"
+              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-700"
+            >
+              <X className="h-[18px] w-[18px]" />
+            </button>
+          )}
 
-          {showResults && results.length > 0 && (
+          {showResults && query.trim() && results.length > 0 && (
             <div className="absolute left-0 right-0 top-[52px] z-30 max-h-[340px] overflow-y-auto rounded-xl border border-[#e5e7eb] bg-white py-1.5 shadow-xl">
               {results.map((m, i) => {
                 const b = m.active_batch;
@@ -361,6 +354,18 @@ export const Billing = ({
                   </button>
                 );
               })}
+            </div>
+          )}
+
+          {showResults && query.trim() && results.length === 0 && (
+            <div className="absolute left-0 right-0 top-[52px] z-30 rounded-xl border border-[#e5e7eb] bg-white px-4 py-3 shadow-xl">
+              <p className="flex items-center gap-2 text-[13px] font-semibold text-gray-800">
+                <Info className="h-4 w-4 shrink-0 text-[#d97706]" />
+                No medicine found for &ldquo;{query.trim()}&rdquo;
+              </p>
+              <p className="mt-1 text-[11.5px] text-gray-500">
+                Try a different name, brand, salt or batch number.
+              </p>
             </div>
           )}
         </div>
@@ -675,7 +680,7 @@ export const Billing = ({
                 <Percent className="h-4 w-4 text-gray-500" /> Apply Discount
               </button>
               {showDiscountBox && (
-                <div className="absolute bottom-[52px] right-0 z-30 w-[260px] rounded-xl border border-[#e5e7eb] bg-white p-3.5 shadow-xl">
+                <div className="absolute bottom-[52px] left-0 right-0 z-30 rounded-xl border border-[#e5e7eb] bg-white p-3.5 shadow-xl sm:left-auto sm:right-0 sm:w-[260px]">
                   <p className="mb-1.5 flex items-start gap-1.5 text-[11.5px] leading-snug text-gray-500">
                     <Info className="mt-[1px] h-3.5 w-3.5 shrink-0 text-[#1f6feb]" />
                     MRP-to-selling discount of {money(totals.discount)} is already applied
@@ -801,7 +806,7 @@ export const Billing = ({
             </button>
 
             {showMore && (
-              <div className="absolute bottom-[70px] right-0 z-30 w-[268px] rounded-xl border border-[#e5e7eb] bg-white p-3.5 shadow-xl">
+              <div className="absolute bottom-[70px] left-0 right-0 z-30 rounded-xl border border-[#e5e7eb] bg-white p-3.5 shadow-xl sm:left-auto sm:right-0 sm:w-[268px]">
                 <p className="mb-1.5 text-[11.5px] font-semibold uppercase tracking-wide text-gray-500">
                   Bill date
                 </p>

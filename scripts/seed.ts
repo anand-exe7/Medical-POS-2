@@ -12,10 +12,12 @@ const db = drizzle(pool, { schema });
 const DEFAULT_SETTINGS = {
   id: 1,
   shopName: "PMBJK MAKKAL MARUNDHAGAM",
-  address: "Near Masaniamman Temple West Entrance, Anaimalai",
-  phone: "+91 73390 40439 / +91 96266 80930",
+  address:
+    "Pradhan Mantri Bhartiya Janaushadhi Kendra, Door No.4/106, MGR Street, Srinivasapuram, Paraniputhur, Chennai - 600122",
+  phone: "8056552022",
+  email: "makkalmarundhangam122@gmail.com",
   gstin: "33ABCDE1234F1Z5",
-  dlNo: "TN/CBE/20B-1234, 21B-1234",
+  dlNo: "TN/KPW20/01877, TN/KPW21/01877",
   defaultGst: "12",
   lowStockThreshold: 20,
   expiryAlertMonths: 6,

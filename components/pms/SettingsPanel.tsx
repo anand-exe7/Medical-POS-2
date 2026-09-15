@@ -85,6 +85,14 @@ export const SettingsPanel = ({
             <Field label="Phone">
               <TextInput value={settings?.phone} onChange={(e) => set({ phone: e.target.value })} />
             </Field>
+            <Field label="Email">
+              <TextInput
+                type="email"
+                value={settings?.email || ""}
+                onChange={(e) => set({ email: e.target.value })}
+                placeholder="shop@example.com"
+              />
+            </Field>
             <Field label="GSTIN">
               <TextInput value={settings?.gstin} onChange={(e) => set({ gstin: e.target.value })} />
             </Field>

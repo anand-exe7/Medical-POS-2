@@ -8,6 +8,13 @@
       "when": 1788158991199,
       "tag": "0000_fair_wendigo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789496146589,
+      "tag": "0001_flimsy_skrulls",
+      "breakpoints": true
     }
   ]
 }

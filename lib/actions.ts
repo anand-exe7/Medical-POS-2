@@ -3,7 +3,7 @@
 import { db } from "./db/client";
 import * as schema from "./db/schema";
 import { eq, sql } from "drizzle-orm";
-import { generateBillId, formatCustomerId } from "./ids";
+import { formatBillId, formatCustomerId } from "./ids";
 import { calcBillTotals, round2 } from "./calc";
 
 export async function saveMedicine(payload: any) {
@@ -150,6 +150,7 @@ export async function saveSettings(payload: any) {
     shopName: payload.shop_name,
     address: payload.address,
     phone: payload.phone,
+    email: payload.email || "",
     gstin: payload.gstin,
     dlNo: payload.dl_no,
     defaultGst: payload.default_gst.toString(),
@@ -197,7 +198,11 @@ export async function submitBill(payload: {
     }
 
     const totals = calcBillTotals(payload.lines);
-    const billId = generateBillId();
+    // The bill_seq Postgres sequence hands out a monotonic integer per bill
+    // — kept in the DB so parallel checkouts can't collide on the same id.
+    const seqRes = await tx.execute(sql`SELECT nextval('bill_seq')`);
+    const seqVal = (seqRes as any).rows ? (seqRes as any).rows[0].nextval : (seqRes as any)[0].nextval;
+    const billId = formatBillId(parseInt(String(seqVal), 10));
     const today = new Date().toISOString().slice(0, 10);
 
     const newBill = {

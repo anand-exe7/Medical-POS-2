@@ -30,26 +30,65 @@ export const monthSlash = (value: string): string => {
   return `${m.padStart(2, "0")}/${y}`;
 };
 
-/** "2026-08-30" -> "30 Aug 2026" */
+/** Every date/time label on the receipt has to read in the pharmacy's own
+   local time — the app is served from Vercel (UTC) but the shop is in India,
+   so "6:26 pm IST" was rendering as "12:56 pm UTC" on the invoice. */
+const TZ = "Asia/Kolkata";
+
+/** "2026-08-30" -> "30 Aug 2026". Parses "YYYY-MM-DD" as calendar date so a
+   plain `date` column never shifts a day when the server sits in UTC. */
 export const dateLong = (value: string): string => {
   if (!value) return "-";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return `${String(d.getDate()).padStart(2, "0")} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  const head = value.slice(0, 10);
+  const parts = head.split("-");
+  if (parts.length === 3) {
+    const [y, m, d] = parts.map(Number);
+    if (y && m >= 1 && m <= 12 && d) {
+      return `${String(d).padStart(2, "0")} ${MONTHS[m - 1]} ${y}`;
+    }
+  }
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) return value;
+  const parts2 = new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ,
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).formatToParts(dt);
+  const get = (t: string) => parts2.find((p) => p.type === t)?.value || "";
+  return `${get("day")} ${get("month")} ${get("year")}`;
 };
 
 /** "2026-08-30" -> "30/08/2026" */
 export const dateSlash = (value: string): string => {
   if (!value) return "-";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+  const head = value.slice(0, 10);
+  const parts = head.split("-");
+  if (parts.length === 3) {
+    const [y, m, d] = parts.map(Number);
+    if (y && m && d) {
+      return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`;
+    }
+  }
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) return value;
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(dt);
 };
 
 export const timeLabel = (value: string): string => {
   const d = value ? new Date(value) : new Date();
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+  return d.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: TZ,
+  });
 };
 
 export const todayIso = (): string => {

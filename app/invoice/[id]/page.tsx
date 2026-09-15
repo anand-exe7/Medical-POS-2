@@ -58,10 +58,19 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           <p className="mt-1 text-[10px]">
             Ph: {shop?.phone}
           </p>
-          {(shop?.gstin || shop?.dl_no) && (
+          {shop?.email && (
+            <p className="mt-0.5 text-[10px]">
+              Email: {shop?.email}
+            </p>
+          )}
+          {shop?.gstin && (
             <p className="mt-1 text-[9px]">
-              {shop?.gstin && `GSTIN: ${shop?.gstin} `}
-              {shop?.dl_no && `DL No: ${shop?.dl_no}`}
+              GSTIN: {shop?.gstin}
+            </p>
+          )}
+          {shop?.dl_no && (
+            <p className="mt-0.5 text-[9px]">
+              DL No: {shop?.dl_no}
             </p>
           )}
         </div>
@@ -124,12 +133,12 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           ))}
         </div>
 
-        {/* Totals */}
+        {/* Totals — the shop asked us to hide the "Discount" line, so the
+             sub-total mirrors the grand total (sum of the item lines above)
+             instead of the MRP-based figure that made customers question the
+             gap. Taxable + GST still shown for the tax-return audit trail. */}
         <div className="border-b border-black py-3 text-[10px] space-y-1">
-          <Row label={`Sub Total (${bill.items.length} Items)`} value={money(bill.sub_total)} />
-          {bill.discount > 0 && (
-            <Row label="Discount" value={`-${money(bill.discount)}`} />
-          )}
+          <Row label={`Sub Total (${bill.items.length} Items)`} value={money(bill.grand_total)} />
           <Row label="Taxable Amount" value={money(bill.taxable_amount)} />
           <Row label={`GST (${bill.gst_percent}%)`} value={money(bill.gst_amount)} />
           

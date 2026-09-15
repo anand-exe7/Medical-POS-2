@@ -300,129 +300,133 @@ export const Purchase = ({
 
         {/* Medicine batch details */}
         <p className="mb-2 mt-6 text-[13px] font-semibold text-gray-800">Medicine Batch Details</p>
-        <div className="overflow-x-auto rounded-lg border border-[#e5e7eb]">
-          <table className="w-full min-w-[820px]">
-            <thead>
-              <tr className="bg-[#f4f6f8] text-gray-700">
-                <th className="th">Brand name</th>
-                <th className="th">Company</th>
-                <th className="th">HSN Code</th>
-                <th className="th">Batch no</th>
-                <th className="th">MFG DT</th>
-                <th className="th">EXP DT</th>
-                <th className="th">Box</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <CellInput value={form.brandName} onChange={(v) => set("brandName", v)} placeholder="Paracip" />
-                <CellInput
-                  value={form.manufacturer}
-                  onChange={(v) => set("manufacturer", v)}
-                  placeholder="Zydus Healthcare"
-                />
-                <CellInput value={form.hsnCode} onChange={(v) => set("hsnCode", v)} placeholder="30049099" />
-                <CellInput value={form.batchNo} onChange={(v) => set("batchNo", v)} placeholder="P500A2306" />
-                <CellInput
-                  value={form.mfgDate}
-                  onChange={(v) => set("mfgDate", v)}
-                  type="month"
-                  placeholder="May-25"
-                />
-                <CellInput
-                  value={form.expDate}
-                  onChange={(v) => set("expDate", v)}
-                  type="month"
-                  placeholder="May-28"
-                />
-                <CellInput
-                  value={form.box}
-                  onChange={(v) => set("box", v.toUpperCase())}
-                  placeholder="A1"
-                />
-              </tr>
-            </tbody>
-          </table>
+        <div className="rounded-lg border border-[#e5e7eb] bg-white p-3 sm:p-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+            <Field label="Brand name">
+              <TextInput
+                value={form.brandName}
+                onChange={(e) => set("brandName", e.target.value)}
+                placeholder="Paracip"
+              />
+            </Field>
+            <Field label="Company">
+              <TextInput
+                value={form.manufacturer}
+                onChange={(e) => set("manufacturer", e.target.value)}
+                placeholder="Zydus Healthcare"
+              />
+            </Field>
+            <Field label="HSN Code">
+              <TextInput
+                value={form.hsnCode}
+                onChange={(e) => set("hsnCode", e.target.value)}
+                placeholder="30049099"
+              />
+            </Field>
+            <Field label="Batch no">
+              <TextInput
+                value={form.batchNo}
+                onChange={(e) => set("batchNo", e.target.value)}
+                placeholder="P500A2306"
+              />
+            </Field>
+            <Field label="MFG DT">
+              <TextInput
+                type="month"
+                value={form.mfgDate}
+                onChange={(e) => set("mfgDate", e.target.value)}
+              />
+            </Field>
+            <Field label="EXP DT">
+              <TextInput
+                type="month"
+                value={form.expDate}
+                onChange={(e) => set("expDate", e.target.value)}
+              />
+            </Field>
+            <Field label="Box">
+              <TextInput
+                value={form.box}
+                onChange={(e) => set("box", e.target.value.toUpperCase())}
+                placeholder="A1"
+              />
+            </Field>
+          </div>
         </div>
 
         {/* Purchase calculation */}
         <p className="mb-2 mt-6 text-[13px] font-semibold text-gray-800">Purchase Calculation</p>
-        <div className="overflow-x-auto rounded-lg border border-[#e5e7eb]">
-          <table className="w-full min-w-[1120px]">
-            <thead>
-              <tr className="bg-[#eaeef1]">
-                <th className={GROUP_TH} colSpan={3}>
-                  Stock
-                </th>
-                <th className={`${GROUP_TH} border-l border-[#d3d9df]`} colSpan={2}>
-                  You pay — supplier
-                </th>
-                <th className={`${GROUP_TH} border-l border-[#d3d9df]`} colSpan={6}>
-                  Customer pays — retail
-                </th>
-              </tr>
-              <tr className="bg-[#f4f6f8] text-gray-700">
-                <th className="th">Purchase Unit</th>
-                <th className="th">Quantity</th>
-                <th className="th bg-[#eef4ef]">Stock Added</th>
-                <th className="th border-l border-[#d3d9df]">Purchase Rate (₹)</th>
-                <th className="th bg-[#eef4ef]">Purchase Total (₹)</th>
-                <th className="th border-l border-[#d3d9df]">MRP (₹)</th>
-                <th className="th bg-[#eef4ef]">MRP Total (₹)</th>
-                <th className="th">Selling Price (₹)</th>
-                <th className="th bg-[#eef4ef]">Per unit price</th>
-                <th className="th">GST %</th>
-                <th className="th bg-[#eef4ef]">Discount</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <CellInput
-                  value={form.packSize}
-                  onChange={(v) => set("packSize", v)}
-                  type="number"
-                  placeholder="10"
-                />
-                <CellInput
-                  value={form.quantity}
-                  onChange={(v) => set("quantity", v)}
-                  type="number"
-                  placeholder="2"
-                />
-                <CellReadonly value={stockAdded ? String(stockAdded) : "—"} />
-                <CellInput
-                  value={form.purchaseRate}
-                  onChange={(v) => set("purchaseRate", v)}
-                  type="number"
-                  placeholder="20"
-                  divider
-                />
-                <CellReadonly value={purchaseCost ? amount(purchaseCost) : "—"} />
-                <CellInput
-                  value={form.mrp}
-                  onChange={(v) => set("mrp", v)}
-                  type="number"
-                  placeholder="60"
-                  divider
-                />
-                <CellReadonly value={total ? amount(total) : "—"} />
-                <CellInput
-                  value={form.sellingPrice}
-                  onChange={(v) => set("sellingPrice", v)}
-                  type="number"
-                  placeholder="40"
-                />
-                <CellReadonly value={perUnitPrice ? amount(perUnitPrice) : "—"} />
-                <CellInput value={form.gst} onChange={(v) => set("gst", v)} type="number" placeholder="12" />
-                <CellReadonly value={discount ? amount(discount) : "—"} tone="green" />
-              </tr>
-            </tbody>
-          </table>
+        <div className="space-y-3">
+          <CalcGroup label="Stock" tone="gray">
+            <Field label="Purchase Unit">
+              <TextInput
+                type="number"
+                value={form.packSize}
+                onChange={(e) => set("packSize", e.target.value)}
+                placeholder="10"
+              />
+            </Field>
+            <Field label="Quantity">
+              <TextInput
+                type="number"
+                value={form.quantity}
+                onChange={(e) => set("quantity", e.target.value)}
+                placeholder="2"
+              />
+            </Field>
+            <CalcReadonly label="Stock Added" value={stockAdded ? String(stockAdded) : "—"} />
+          </CalcGroup>
+
+          <CalcGroup label="You pay — supplier" tone="blue">
+            <Field label="Purchase Rate (₹)">
+              <TextInput
+                type="number"
+                value={form.purchaseRate}
+                onChange={(e) => set("purchaseRate", e.target.value)}
+                placeholder="20"
+              />
+            </Field>
+            <CalcReadonly label="Purchase Total (₹)" value={purchaseCost ? amount(purchaseCost) : "—"} />
+          </CalcGroup>
+
+          <CalcGroup label="Customer pays — retail" tone="green">
+            <Field label="MRP (₹)">
+              <TextInput
+                type="number"
+                value={form.mrp}
+                onChange={(e) => set("mrp", e.target.value)}
+                placeholder="60"
+              />
+            </Field>
+            <CalcReadonly label="MRP Total (₹)" value={total ? amount(total) : "—"} />
+            <Field label="Selling Price (₹)">
+              <TextInput
+                type="number"
+                value={form.sellingPrice}
+                onChange={(e) => set("sellingPrice", e.target.value)}
+                placeholder="40"
+              />
+            </Field>
+            <CalcReadonly label="Per unit price" value={perUnitPrice ? amount(perUnitPrice) : "—"} />
+            <Field label="GST %">
+              <TextInput
+                type="number"
+                value={form.gst}
+                onChange={(e) => set("gst", e.target.value)}
+                placeholder="12"
+              />
+            </Field>
+            <CalcReadonly
+              label="Discount"
+              value={discount ? amount(discount) : "—"}
+              tone="green"
+            />
+          </CalcGroup>
         </div>
 
         <p className="mt-2 text-[11.5px] text-gray-500">
-          The shaded columns fill in on their own — Stock Added, Purchase Total, MRP Total, Per unit
-          price and Discount. Every other column is typed in.
+          The read-only fields fill in on their own — Stock Added, Purchase Total, MRP Total, Per unit
+          price and Discount. Every other field is typed in.
         </p>
 
         {/* Totals strip */}
@@ -483,45 +487,55 @@ export const Purchase = ({
   );
 };
 
-/* ------------------------------ table cells ------------------------------ */
+/* ---------------------- purchase calculation blocks ---------------------- */
 
-const GROUP_TH =
-  "px-2.5 py-2 text-center text-[10.5px] font-bold uppercase tracking-[0.09em] text-gray-500";
-
-const CellInput = ({
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  divider,
+const CalcGroup = ({
+  label,
+  tone = "gray",
+  children,
 }: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  type?: string;
-  divider?: boolean;
-}) => (
-  <td className={`border-t border-[#eef1f3] px-2 py-2 ${divider ? "border-l border-l-[#d3d9df]" : ""}`}>
-    <input
-      value={value}
-      type={type}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="h-10 w-full rounded-md border border-[#dfe3e7] px-2.5 text-[13px] outline-none transition placeholder:text-gray-300 focus:border-[#0f7a31] focus:ring-2 focus:ring-[#0f7a31]/12"
-    />
-  </td>
-);
+  label: string;
+  tone?: "gray" | "blue" | "green";
+  children: React.ReactNode;
+}) => {
+  const tones: Record<string, string> = {
+    gray: "bg-[#f4f6f8] text-gray-600",
+    blue: "bg-[#eaf1fe] text-[#1f6feb]",
+    green: "bg-[#eef7f1] text-[#0a6127]",
+  };
+  return (
+    <div className="overflow-hidden rounded-lg border border-[#e5e7eb] bg-white">
+      <p
+        className={`px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.09em] ${tones[tone]}`}
+      >
+        {label}
+      </p>
+      <div className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-3 xl:grid-cols-6">
+        {children}
+      </div>
+    </div>
+  );
+};
 
-const CellReadonly = ({ value, tone }: { value: string; tone?: "green" }) => (
-  <td className="border-t border-[#eef1f3] bg-[#f7faf8] px-2 py-2">
+const CalcReadonly = ({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "green";
+}) => (
+  <div>
+    <label className="field-label">{label}</label>
     <div
-      className={`flex h-10 items-center justify-center rounded-md border border-dashed border-[#cfd9d2] px-2 text-[13.5px] font-bold ${
+      className={`flex h-[42px] items-center justify-center rounded-lg border border-dashed border-[#cfd9d2] bg-[#f7faf8] px-3 text-[14px] font-bold ${
         tone === "green" ? "text-[#0a6127]" : "text-gray-900"
       }`}
     >
       {value}
     </div>
-  </td>
+  </div>
 );
 
 const SummaryCell = ({

@@ -35,10 +35,12 @@ const nowIso = () => new Date().toISOString();
 
 export const DEFAULT_SETTINGS: ShopSettings = {
   shop_name: "PMBJK MAKKAL MARUNDHAGAM",
-  address: "Near Masaniamman Temple West Entrance, Anaimalai",
-  phone: "+91 73390 40439 / +91 96266 80930",
+  address:
+    "Pradhan Mantri Bhartiya Janaushadhi Kendra, Door No.4/106, MGR Street, Srinivasapuram, Paraniputhur, Chennai - 600122",
+  phone: "8056552022",
+  email: "makkalmarundhangam122@gmail.com",
   gstin: "33ABCDE1234F1Z5",
-  dl_no: "TN/CBE/20B-1234, 21B-1234",
+  dl_no: "TN/KPW20/01877, TN/KPW21/01877",
   default_gst: 12,
   low_stock_threshold: 20,
   expiry_alert_months: 6,

@@ -198,6 +198,7 @@ export type ShopSettings = {
   shop_name: string;
   address: string;
   phone: string;
+  email: string;
   gstin: string;
   dl_no: string;
   default_gst: number;

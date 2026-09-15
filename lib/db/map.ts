@@ -111,6 +111,7 @@ export const mapSettings = (row: any): ShopSettings => ({
   shop_name: row.shopName,
   address: row.address,
   phone: row.phone,
+  email: row.email || "",
   gstin: row.gstin,
   dl_no: row.dlNo,
   default_gst: toNum(row.defaultGst),
