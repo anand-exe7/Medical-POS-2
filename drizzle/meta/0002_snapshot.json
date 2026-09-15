@@ -1,6 +1,6 @@
 {
-  "id": "4c630354-b911-49bd-a09a-3b2d21d277f2",
-  "prevId": "76197313-db97-45ec-b8cc-7df904df64e1",
+  "id": "c3261f55-0d6d-4110-9015-b69da01b436f",
+  "prevId": "4c630354-b911-49bd-a09a-3b2d21d277f2",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -767,6 +767,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
         "gstin": {
           "name": "gstin",
           "type": "text",
@@ -860,6 +867,16 @@
   "enums": {},
   "schemas": {},
   "sequences": {
+    "public.bill_seq": {
+      "name": "bill_seq",
+      "schema": "public",
+      "increment": "1",
+      "startWith": "1",
+      "minValue": "1",
+      "maxValue": "9223372036854775807",
+      "cache": "1",
+      "cycle": false
+    },
     "public.customer_seq": {
       "name": "customer_seq",
       "schema": "public",

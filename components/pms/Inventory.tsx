@@ -59,7 +59,8 @@ export const Inventory = ({
         q &&
         !(
           medicine.generic_name.toLowerCase().includes(q) ||
-          medicine.brand_name.toLowerCase().includes(q) ||
+          batch.brand_name.toLowerCase().includes(q) ||
+          batch.manufacturer.toLowerCase().includes(q) ||
           batch.batch_no.toLowerCase().includes(q) ||
           medicine.hsn_code.includes(q) ||
           batch.box.toLowerCase().includes(q)
@@ -297,7 +298,7 @@ export const Inventory = ({
                           {(currentPage - 1) * PAGE_SIZE + index + 1}
                         </td>
                         <td className="td whitespace-nowrap font-medium text-gray-900">{medicine.generic_name}</td>
-                        <td className="td">{medicine.brand_name}</td>
+                        <td className="td">{batch.brand_name || medicine.brand_name}</td>
                         <td
                           className={`td whitespace-nowrap text-[12.5px] font-semibold ${
                             otc ? "text-[#128a3a]" : "text-[#dc2626]"
@@ -499,9 +500,9 @@ const MedicineMaster = ({
             return (
               <tr key={medicine.id} className="transition hover:bg-[#fafbfc]">
                 <td className="td text-gray-500">{index + 1}</td>
-                <td className="td font-medium text-gray-900">{medicine.brand_name}</td>
+                <td className="td font-medium text-gray-900">{b?.brand_name || medicine.brand_name}</td>
                 <td className="td">{medicine.generic_name}</td>
-                <td className="td">{medicine.manufacturer}</td>
+                <td className="td">{b?.manufacturer || medicine.manufacturer}</td>
                 <td className="td">
                   <span
                     className={`text-[12.5px] font-semibold ${
@@ -612,6 +613,12 @@ const EditBatchModal = ({
       }
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Field label="Brand Name">
+          <TextInput value={draft.brand_name} onChange={(e) => set({ brand_name: e.target.value })} />
+        </Field>
+        <Field label="Manufacturer">
+          <TextInput value={draft.manufacturer} onChange={(e) => set({ manufacturer: e.target.value })} />
+        </Field>
         <Field label="Batch No">
           <TextInput value={draft.batch_no} onChange={(e) => set({ batch_no: e.target.value })} />
         </Field>
@@ -727,12 +734,6 @@ const EditMedicineModal = ({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Generic Name">
           <TextInput value={draft.generic_name} onChange={(e) => set({ generic_name: e.target.value })} />
-        </Field>
-        <Field label="Brand Name">
-          <TextInput value={draft.brand_name} onChange={(e) => set({ brand_name: e.target.value })} />
-        </Field>
-        <Field label="Manufacturer">
-          <TextInput value={draft.manufacturer} onChange={(e) => set({ manufacturer: e.target.value })} />
         </Field>
         <Field label="Salt / Composition">
           <TextInput value={draft.salt} onChange={(e) => set({ salt: e.target.value })} />

@@ -24,6 +24,8 @@ export const mapBatch = (row: any): Batch => ({
   id: row.id,
   medicine_id: row.medicineId,
   supplier_id: row.supplierId,
+  brand_name: row.brandName ?? "",
+  manufacturer: row.manufacturer ?? "",
   invoice_no: row.invoiceNo,
   purchase_date: row.purchaseDate,
   batch_no: row.batchNo,

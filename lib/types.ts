@@ -45,11 +45,18 @@ export type Supplier = {
  * Money fields are PER PACK (per strip / piece / bottle).
  * `pack_size` is the numeric "Purchase Unit" — how many sellable units are in
  * one pack (e.g. 10 tablets per strip).
+ *
+ * `brand_name` and `manufacturer` live here because the same generic medicine
+ * (e.g. Azithromycin 500mg) can be stocked from multiple brands/makers.
  */
 export type Batch = {
   id: string;
   medicine_id: string;
   supplier_id: string | null;
+  /** Brand name specific to this purchase batch (e.g. "Azicip") */
+  brand_name: string;
+  /** Manufacturer specific to this purchase batch (e.g. "Cipla Ltd") */
+  manufacturer: string;
   invoice_no: string;
   /** yyyy-mm-dd */
   purchase_date: string;

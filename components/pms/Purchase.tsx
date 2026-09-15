@@ -12,7 +12,7 @@ import {
 } from "@/lib/calc";
 import { amount, monthShort, todayIso, unitNoun } from "@/lib/format";
 import { getSettings } from "@/lib/store";
-import { saveBatch, saveMedicine } from "@/lib/actions";
+import { saveBatch, saveMedicine, saveSupplier } from "@/lib/actions";
 import { Button, Card, Field, ScreenHeading, Select, TextInput } from "./ui";
 
 /** Dropdown options requested by the client (slide 9 / 10) */
@@ -21,6 +21,7 @@ const SCHEDULES: DrugSchedule[] = ["H", "H1", "X", "NRX", "OTC", "General"];
 
 const blankForm = () => ({
   supplierId: "",
+  supplierName: "",
   invoiceNo: "",
   date: todayIso(),
   medicineId: "",
@@ -94,8 +95,10 @@ export const Purchase = ({
       medicineId: medicine.id,
       medicineName: medicine.generic_name,
       genericName: medicine.generic_name,
-      brandName: medicine.brand_name,
-      manufacturer: medicine.manufacturer,
+      // Brand / manufacturer are NOT copied from the medicine — they belong to
+      // the batch being purchased and must be entered fresh each time.
+      brandName: prev.brandName,
+      manufacturer: prev.manufacturer,
       salt: medicine.salt,
       hsnCode: medicine.hsn_code,
       schedule: medicine.schedule,
@@ -135,9 +138,18 @@ export const Purchase = ({
 
     setError("");
 
+    // Resolve supplier: if text was typed and doesn't match any existing supplier,
+    // create a new one on the fly.
+    let resolvedSupplierId = form.supplierId || null;
+    if (!resolvedSupplierId && form.supplierName.trim()) {
+      const newId = await saveSupplier({ name: form.supplierName.trim(), phone: "", gstin: "" });
+      resolvedSupplierId = newId || null;
+    }
+
     const medicineId = await saveMedicine({
       id: form.medicineId || undefined,
       generic_name: form.genericName.trim(),
+      // brand_name / manufacturer only passed for new medicine inserts (legacy field).
       brand_name: form.brandName.trim(),
       manufacturer: form.manufacturer.trim(),
       salt: form.salt.trim() || form.genericName.trim(),
@@ -150,7 +162,9 @@ export const Purchase = ({
 
     await saveBatch({
       medicine_id: medicineId,
-      supplier_id: form.supplierId || null,
+      supplier_id: resolvedSupplierId,
+      brand_name: form.brandName.trim(),
+      manufacturer: form.manufacturer.trim(),
       invoice_no: form.invoiceNo.trim(),
       purchase_date: form.date,
       batch_no: form.batchNo.trim(),
@@ -169,7 +183,7 @@ export const Purchase = ({
     });
 
     onSaved(`Stock added — ${stockAdded} ${unitWord} of ${form.genericName.trim()}.`);
-    setForm({ ...blankForm(), supplierId: form.supplierId, invoiceNo: form.invoiceNo, date: form.date });
+    setForm({ ...blankForm(), supplierId: form.supplierId, supplierName: form.supplierName, invoiceNo: form.invoiceNo, date: form.date });
   };
 
   useEffect(() => {
@@ -191,14 +205,32 @@ export const Purchase = ({
         {/* Supplier / Invoice / Date */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Field label="Supplier">
-            <Select value={form.supplierId} onChange={(e) => set("supplierId", e.target.value)}>
-              <option value="">Select supplier</option>
-              {suppliers.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </Select>
+            {/* Combobox: pick from existing list OR type a new name */}
+            <div className="relative">
+              <input
+                list="supplier-list"
+                value={form.supplierName || suppliers.find((s) => s.id === form.supplierId)?.name || ""}
+                onChange={(e) => {
+                  const typed = e.target.value;
+                  const match = suppliers.find((s) => s.name.toLowerCase() === typed.toLowerCase());
+                  setForm((prev) => ({
+                    ...prev,
+                    supplierName: typed,
+                    supplierId: match ? match.id : "",
+                  }));
+                }}
+                placeholder="Select or type new supplier"
+                className="h-11 w-full rounded-lg border border-[#dfe3e7] px-3 text-[13px] outline-none transition placeholder:text-gray-300 focus:border-[#0f7a31] focus:ring-2 focus:ring-[#0f7a31]/12"
+              />
+              <datalist id="supplier-list">
+                {suppliers.map((s) => (
+                  <option key={s.id} value={s.name} />
+                ))}
+              </datalist>
+            </div>
+            {form.supplierName && !form.supplierId && (
+              <p className="mt-1 text-[11px] text-[#1f6feb]">New supplier — will be created on save.</p>
+            )}
           </Field>
           <Field label="Invoice No">
             <TextInput
@@ -252,7 +284,13 @@ export const Purchase = ({
                           {m.generic_name}
                         </span>
                         <span className="block truncate text-[11.5px] text-gray-500">
-                          {m.brand_name} · {m.manufacturer} · HSN {m.hsn_code}
+                          {(() => {
+                            // Show brands from all batches of this medicine
+                            const batchBrands = [...new Set(
+                              m.batches.map((b) => b.brand_name).filter(Boolean)
+                            )].join(" / ");
+                            return batchBrands || m.brand_name || "";
+                          })()} · HSN {m.hsn_code}
                         </span>
                       </span>
                       <span className="shrink-0 text-[12px] font-semibold text-[#0a6127]">

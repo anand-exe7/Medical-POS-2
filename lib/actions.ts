@@ -8,10 +8,9 @@ import { calcBillTotals, round2 } from "./calc";
 
 export async function saveMedicine(payload: any) {
   if (payload.id && !payload.id.startsWith("id-")) {
+    // Brand name & manufacturer are now batch-level; only update generic medicine fields.
     await db.update(schema.medicines).set({
       genericName: payload.generic_name,
-      brandName: payload.brand_name,
-      manufacturer: payload.manufacturer,
       salt: payload.salt,
       schedule: payload.schedule,
       hsnCode: payload.hsn_code,
@@ -22,8 +21,9 @@ export async function saveMedicine(payload: any) {
   } else {
     const res = await db.insert(schema.medicines).values({
       genericName: payload.generic_name,
-      brandName: payload.brand_name,
-      manufacturer: payload.manufacturer,
+      // Keep brand/manufacturer on insert for legacy display; these won't be updated later.
+      brandName: payload.brand_name ?? "",
+      manufacturer: payload.manufacturer ?? "",
       salt: payload.salt,
       schedule: payload.schedule,
       hsnCode: payload.hsn_code,
@@ -39,19 +39,21 @@ export async function deleteMedicine(id: string) {
   await db.delete(schema.medicines).where(eq(schema.medicines.id, id));
 }
 
-export async function saveSupplier(payload: any) {
+export async function saveSupplier(payload: any): Promise<string | undefined> {
   if (payload.id && !payload.id.startsWith("id-")) {
     await db.update(schema.suppliers).set({
       name: payload.name,
       phone: payload.phone,
       gstin: payload.gstin,
     }).where(eq(schema.suppliers.id, payload.id));
+    return payload.id;
   } else {
-    await db.insert(schema.suppliers).values({
+    const res = await db.insert(schema.suppliers).values({
       name: payload.name,
-      phone: payload.phone,
-      gstin: payload.gstin,
-    });
+      phone: payload.phone ?? "",
+      gstin: payload.gstin ?? "",
+    }).returning({ id: schema.suppliers.id });
+    return res[0].id;
   }
 }
 
@@ -62,6 +64,8 @@ export async function deleteSupplier(id: string) {
 export async function saveBatch(payload: any) {
   if (payload.id && !payload.id.startsWith("id-")) {
     await db.update(schema.batches).set({
+      brandName: payload.brand_name ?? "",
+      manufacturer: payload.manufacturer ?? "",
       invoiceNo: payload.invoice_no,
       purchaseDate: payload.purchase_date,
       batchNo: payload.batch_no,
@@ -83,6 +87,8 @@ export async function saveBatch(payload: any) {
     return payload.id;
   } else {
     const res = await db.insert(schema.batches).values({
+      brandName: payload.brand_name ?? "",
+      manufacturer: payload.manufacturer ?? "",
       invoiceNo: payload.invoice_no,
       purchaseDate: payload.purchase_date,
       batchNo: payload.batch_no,

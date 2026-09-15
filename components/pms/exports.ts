@@ -35,7 +35,7 @@ export const INVENTORY_SHEET = (rows: BatchRow[]): Sheet => ({
   rows: rows.map(({ batch, medicine }, index) => [
     index + 1,
     medicine.generic_name,
-    medicine.brand_name,
+    batch.brand_name || medicine.brand_name,
     medicine.schedule,
     batch.box,
     medicine.hsn_code,

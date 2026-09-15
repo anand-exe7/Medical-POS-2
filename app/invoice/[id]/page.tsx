@@ -29,13 +29,15 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
     <div className="flex min-h-screen flex-col items-center bg-[#f7f8fa] px-4 py-8 print:bg-white print:p-0">
       <style>{`
         @media print {
-          @page { margin: 0; width: 80mm; }
-          body { 
-            background: #fff !important; 
-            width: 80mm !important; 
+          @page { margin: 0; size: 72mm auto; }
+          html, body {
+            background: #fff !important;
+            width: 72mm !important;
             margin: 0 !important;
             padding: 0 !important;
             font-family: monospace, sans-serif !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
         }
       `}</style>
@@ -44,7 +46,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         <InvoiceActions />
       </div>
 
-      <div className="w-[80mm] overflow-hidden bg-white px-4 py-4 print:w-[80mm] print:px-2 print:py-2 text-black font-mono mx-auto text-xs">
+      <div className="w-[72mm] overflow-hidden bg-white px-3 py-4 print:w-[72mm] print:px-1.5 print:py-2 text-black font-mono mx-auto text-xs">
         {/* Header */}
         <div className="flex flex-col items-center border-b border-black pb-3 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}

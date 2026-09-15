@@ -68,7 +68,7 @@ export const TopBar = ({
             onKeyDown={(e) => {
               if (e.key === "Enter") onSearchSubmit();
             }}
-            placeholder="Search medicine by name / salt / barcode"
+            placeholder="Search medicine by name"
             className="h-11 w-full rounded-xl border border-[#e2e6ea] bg-white pl-11 pr-14 text-[14px] text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-[#0f7a31] focus:ring-2 focus:ring-[#0f7a31]/12"
           />
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md border border-[#cfe6d6] bg-[#eef7f1] px-2 py-0.5 text-[11px] font-semibold text-[#0a6127]">

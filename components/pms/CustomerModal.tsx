@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Zap, Info, User, Phone, MapPin, Stethoscope, Printer, X, Search } from "lucide-react";
 import type { Customer } from "@/lib/types";
-import { listCustomers } from "@/lib/store";
+import { useCustomers } from "./data";
 import { Button } from "./ui";
 
 export type CustomerPayload = {
@@ -25,7 +25,9 @@ export const CustomerModal = ({
   onConfirm: (payload: CustomerPayload) => void;
 }) => {
   // The dialog is keyed on `open` at the call site, so mounting gives a clean form.
-  const [customers] = useState<Customer[]>(() => listCustomers());
+  // Customers come from the Neon DB (via SWR); the parent already loaded this
+  // endpoint, so it reads from cache with no extra request.
+  const { data: customers = [] } = useCustomers();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
