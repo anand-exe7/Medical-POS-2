@@ -11,7 +11,7 @@ import {
   calcTotal,
 } from "@/lib/calc";
 import { amount, monthShort, todayIso, unitNoun } from "@/lib/format";
-import { getSettings } from "@/lib/store";
+import { useSettings } from "./data";
 import { saveBatch, saveMedicine, saveSupplier } from "@/lib/actions";
 import { Button, Card, Field, ScreenHeading, Select, TextInput } from "./ui";
 
@@ -19,7 +19,7 @@ import { Button, Card, Field, ScreenHeading, Select, TextInput } from "./ui";
 const PURCHASE_UNITS: PurchaseUnitType[] = ["Strip", "Piece", "Bottle"];
 const SCHEDULES: DrugSchedule[] = ["H", "H1", "X", "NRX", "OTC", "General"];
 
-const blankForm = () => ({
+const blankForm = (defaultGst = 12) => ({
   supplierId: "",
   supplierName: "",
   invoiceNo: "",
@@ -42,7 +42,7 @@ const blankForm = () => ({
   purchaseRate: "",
   mrp: "",
   sellingPrice: "",
-  gst: String(getSettings().default_gst ?? 12),
+  gst: String(defaultGst),
 });
 
 export const Purchase = ({
@@ -54,7 +54,16 @@ export const Purchase = ({
   suppliers: Supplier[];
   onSaved: (message: string) => void;
 }) => {
-  const [form, setForm] = useState(blankForm);
+  const { data: settings } = useSettings();
+  const defaultGst = settings?.default_gst ?? 12;
+  const [form, setForm] = useState(() => blankForm(defaultGst));
+
+  // Settings load asynchronously; apply the shop's default GST to a fresh form.
+  const [appliedGst, setAppliedGst] = useState(defaultGst);
+  if (appliedGst !== defaultGst) {
+    setAppliedGst(defaultGst);
+    if (!form.medicineId) setForm((prev) => ({ ...prev, gst: String(defaultGst) }));
+  }
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState("");
   const searchWrapRef = useRef<HTMLDivElement>(null);
@@ -157,7 +166,7 @@ export const Purchase = ({
       hsn_code: form.hsnCode.trim(),
       gst_percent: Number(form.gst) || 0,
       purchase_unit_type: form.purchaseUnitType,
-      low_stock_threshold: getSettings().low_stock_threshold,
+      low_stock_threshold: settings?.low_stock_threshold ?? 10,
     });
 
     await saveBatch({
@@ -183,7 +192,7 @@ export const Purchase = ({
     });
 
     onSaved(`Stock added — ${stockAdded} ${unitWord} of ${form.genericName.trim()}.`);
-    setForm({ ...blankForm(), supplierId: form.supplierId, supplierName: form.supplierName, invoiceNo: form.invoiceNo, date: form.date });
+    setForm({ ...blankForm(defaultGst), supplierId: form.supplierId, supplierName: form.supplierName, invoiceNo: form.invoiceNo, date: form.date });
   };
 
   useEffect(() => {
@@ -488,7 +497,7 @@ export const Purchase = ({
 
         {/* Actions */}
         <div className="mt-5 flex flex-wrap items-center justify-end gap-3">
-          <Button variant="ghost" onClick={() => setForm(blankForm())}>
+          <Button variant="ghost" onClick={() => setForm(blankForm(defaultGst))}>
             Cancel
           </Button>
           <Button onClick={handleSave}>

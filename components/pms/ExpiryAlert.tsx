@@ -3,7 +3,8 @@
 import React, { useMemo, useState } from "react";
 import { CalendarX2, CalendarClock, ArrowDownCircle, Download, Search } from "lucide-react";
 import { amount, expiryState, monthSlash, monthsToExpiry, unitNoun } from "@/lib/format";
-import { type BatchRow, getSettings } from "@/lib/store";
+import type { BatchRow } from "@/lib/store";
+import { useSettings } from "./data";
 import { downloadExcel } from "@/lib/xlsx";
 import { Button, Card, PageTitle, StatTile } from "./ui";
 import { monthShort } from "@/lib/format";
@@ -13,7 +14,8 @@ type Tab = "expired" | "soon" | "low";
 export const ExpiryAlert = ({ rows }: { rows: BatchRow[] }) => {
   const [tab, setTab] = useState<Tab>("soon");
   const [search, setSearch] = useState("");
-  const alertMonths = getSettings().expiry_alert_months;
+  const { data: settings } = useSettings();
+  const alertMonths = settings?.expiry_alert_months ?? 6;
 
   const buckets = useMemo(() => {
     const expired: typeof rows = [];
