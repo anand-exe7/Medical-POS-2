@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Search, Info, Save, Plus, CalendarDays } from "lucide-react";
+import { Search, Info, Save, Plus } from "lucide-react";
 import type { DrugSchedule, MedicineWithBatches, PurchaseUnitType, Supplier } from "@/lib/types";
 import {
   calcDiscount,
@@ -245,9 +245,7 @@ export const Purchase = ({
                 type="date"
                 value={form.date}
                 onChange={(e) => set("date", e.target.value)}
-                className="pr-10"
               />
-              <CalendarDays className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             </div>
           </Field>
         </div>

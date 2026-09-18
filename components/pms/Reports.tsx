@@ -203,11 +203,11 @@ export const Reports = ({
       </div>
 
       {/* Totals */}
-      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        <StatTile icon={<span className="text-[15px] font-bold">₹</span>} label="Revenue" value={money(totals.revenue)} tone="green" />
-        <StatTile icon={<FileSpreadsheet className="h-[18px] w-[18px]" />} label="Bills" value={totals.bills} tone="blue" />
-        <StatTile icon={<span className="text-[15px] font-bold">#</span>} label="Units Sold" value={totals.units} tone="gray" />
-        <StatTile icon={<span className="text-[15px] font-bold">%</span>} label="Discount Given" value={money(totals.discount)} tone="amber" />
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+        <StatTile icon={<span className="text-[17px] font-bold">₹</span>} label="Revenue" value={money(totals.revenue)} tone="green" />
+        <StatTile icon={<FileSpreadsheet className="h-5 w-5" />} label="Bills" value={totals.bills} tone="blue" />
+        <StatTile icon={<span className="text-[17px] font-bold">#</span>} label="Units Sold" value={totals.units} tone="gray" />
+        <StatTile icon={<span className="text-[17px] font-bold">%</span>} label="Discount Given" value={money(totals.discount)} tone="amber" />
         <StatTile icon={<span className="text-[13px] font-bold">GST</span>} label="GST (included)" value={money(totals.gst)} tone="gray" />
       </div>
 

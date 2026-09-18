@@ -40,11 +40,13 @@ export const ScreenHeading = ({
 export const Card = ({
   className = "",
   children,
+  onClick,
 }: {
   className?: string;
   children: React.ReactNode;
+  onClick?: () => void;
 }) => (
-  <div className={`rounded-xl border border-[#e5e7eb] bg-white ${className}`}>{children}</div>
+  <div onClick={onClick} className={`rounded-xl border border-[#e5e7eb] bg-white ${className}`}>{children}</div>
 );
 
 /* -------------------------------- Fields -------------------------------- */
@@ -203,6 +205,48 @@ export const Modal = ({
 
 /* ------------------------------ Stat tiles ------------------------------ */
 
+/** Small centered popup showing a single stat value. */
+export const ValuePopup = ({
+  open,
+  onClose,
+  icon,
+  iconClass,
+  label,
+  value,
+  sub,
+}: {
+  open: boolean;
+  onClose: () => void;
+  icon: React.ReactNode;
+  iconClass: string;
+  label: string;
+  value: React.ReactNode;
+  sub?: React.ReactNode;
+}) =>
+  !open ? null : (
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6 backdrop-blur-[2px]"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-xs rounded-2xl bg-white px-6 py-6 text-center shadow-2xl"
+      >
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute right-3 top-3 cursor-pointer rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        <span className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl ${iconClass}`}>{icon}</span>
+        <p className="text-[13px] text-gray-500">{label}</p>
+        <p className="mt-1 break-words text-[30px] font-bold leading-tight text-gray-900">{value}</p>
+        {sub && <p className="mt-1 text-[12.5px] text-gray-500">{sub}</p>}
+      </div>
+    </div>
+  );
+
 export const StatTile = ({
   icon,
   label,
@@ -214,6 +258,7 @@ export const StatTile = ({
   value: React.ReactNode;
   tone?: "blue" | "amber" | "red" | "green" | "gray";
 }) => {
+  const [open, setOpen] = React.useState(false);
   const tones: Record<string, string> = {
     blue: "text-[#1f6feb] bg-[#eaf1fe]",
     amber: "text-[#d97706] bg-[#fef4e6]",
@@ -222,15 +267,20 @@ export const StatTile = ({
     gray: "text-gray-600 bg-gray-100",
   };
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-[#e5e7eb] bg-white px-4 py-3">
-      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tones[tone]}`}>
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="truncate text-[12px] text-gray-500">{label}</p>
-        <p className="text-[18px] font-bold leading-tight text-gray-900">{value}</p>
-      </div>
-    </div>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex w-full cursor-pointer items-center gap-3.5 rounded-xl border border-[#e5e7eb] bg-white px-4 py-4 text-left transition hover:border-[#0f7a31]/40 hover:shadow-md"
+      >
+        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tones[tone]}`}>{icon}</span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] leading-snug text-gray-500">{label}</p>
+          <p className="break-words text-[22px] font-bold leading-tight text-gray-900">{value}</p>
+        </div>
+      </button>
+      <ValuePopup open={open} onClose={() => setOpen(false)} icon={icon} iconClass={tones[tone]} label={label} value={value} />
+    </>
   );
 };
 
