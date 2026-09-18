@@ -48,19 +48,19 @@ export const TopBar = ({
   }, []);
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-3 border-b border-[#e9ecef] bg-white px-4 sm:px-5">
+    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-1.5 border-b border-[#e9ecef] bg-white px-2 sm:gap-3 sm:px-5">
       <button
         onClick={onMenu}
         aria-label="Open menu"
-        className="cursor-pointer rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 lg:hidden"
+        className="shrink-0 cursor-pointer rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 lg:hidden"
       >
         <Menu className="h-5 w-5" />
       </button>
 
       {/* Global medicine search */}
-      <div className="mx-auto w-full max-w-[560px]">
+      <div className="mx-auto min-w-0 flex-1 max-w-[560px]">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-[17px] w-[17px] -translate-y-1/2 text-gray-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-[17px] w-[17px] -translate-y-1/2 text-gray-400" />
           <input
             ref={searchRef}
             value={search}
@@ -69,9 +69,9 @@ export const TopBar = ({
               if (e.key === "Enter") onSearchSubmit();
             }}
             placeholder="Search medicine by name"
-            className="h-11 w-full rounded-xl border border-[#e2e6ea] bg-white pl-11 pr-14 text-[14px] text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-[#0f7a31] focus:ring-2 focus:ring-[#0f7a31]/12"
+            className="h-11 w-full rounded-xl border border-[#e2e6ea] bg-white pl-9 pr-3 text-[14px] sm:pl-11 sm:pr-14 text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-[#0f7a31] focus:ring-2 focus:ring-[#0f7a31]/12"
           />
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md border border-[#cfe6d6] bg-[#eef7f1] px-2 py-0.5 text-[11px] font-semibold text-[#0a6127]">
+          <span className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md sm:inline-block border border-[#cfe6d6] bg-[#eef7f1] px-2 py-0.5 text-[11px] font-semibold text-[#0a6127]">
             F2
           </span>
         </div>
@@ -92,7 +92,7 @@ export const TopBar = ({
       <div className="relative" ref={menuRef}>
         <button
           onClick={() => setMenuOpen((v) => !v)}
-          className="flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 transition hover:bg-gray-50"
+          className="flex shrink-0 cursor-pointer items-center gap-2.5 rounded-xl p-1 sm:px-2.5 sm:py-2 transition hover:bg-gray-50"
         >
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
             <User className="h-[18px] w-[18px] text-gray-600" />
@@ -101,7 +101,7 @@ export const TopBar = ({
             <span className="block text-[13px] font-semibold text-gray-800">Pharmacist</span>
             <span className="block text-[11.5px] capitalize text-gray-500">{role}</span>
           </span>
-          <ChevronDown className="h-4 w-4 text-gray-400" />
+          <ChevronDown className="hidden h-4 w-4 text-gray-400 sm:block" />
         </button>
 
         {menuOpen && (

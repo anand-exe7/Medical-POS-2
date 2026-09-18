@@ -56,7 +56,7 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-@layer utilities {
+@layer components {
   .field {
     @apply w-full rounded-lg border border-[#d8dde3] bg-white px-3 py-2.5 text-sm text-gray-900
            outline-none transition placeholder:text-gray-400

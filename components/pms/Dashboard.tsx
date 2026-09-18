@@ -14,7 +14,7 @@ import {
 import type { Bill, MedicineWithBatches } from "@/lib/types";
 import { amount, expiryState, money, monthSlash, timeLabel, todayIso } from "@/lib/format";
 import { round2 } from "@/lib/calc";
-import { Card, PageTitle, Pill } from "./ui";
+import { Card, PageTitle, Pill, ValuePopup } from "./ui";
 import type { ScreenKey } from "./Sidebar";
 
 export const Dashboard = ({
@@ -304,13 +304,18 @@ const KpiCard = ({
   sub: string;
   tone: "green" | "blue" | "gray";
 }) => {
+  const [open, setOpen] = React.useState(false);
   const tones: Record<string, string> = {
     green: "bg-[#e8f5ec] text-[#0a6127]",
     blue: "bg-[#eaf1fe] text-[#1f6feb]",
     gray: "bg-gray-100 text-gray-600",
   };
   return (
-    <Card className="p-4">
+    <>
+    <Card
+      className="cursor-pointer p-4 transition hover:border-[#0f7a31]/40 hover:shadow-md"
+      onClick={() => setOpen(true)}
+    >
       <div className="flex items-start justify-between">
         <div className="min-w-0">
           <p className="text-[12.5px] text-gray-500">{label}</p>
@@ -324,6 +329,8 @@ const KpiCard = ({
         </span>
       </div>
     </Card>
+    <ValuePopup open={open} onClose={() => setOpen(false)} icon={icon} iconClass={tones[tone]} label={label} value={value} sub={sub} />
+    </>
   );
 };
 

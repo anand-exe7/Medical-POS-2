@@ -110,9 +110,13 @@ export const ExpiryAlert = ({ rows }: { rows: BatchRow[] }) => {
       />
 
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatTile icon={<CalendarX2 className="h-[18px] w-[18px]" />} label="Expired batches" value={buckets.expired.length} tone="red" />
-        <StatTile icon={<CalendarClock className="h-[18px] w-[18px]" />} label="Expiring soon" value={buckets.soon.length} tone="amber" />
-        <StatTile icon={<ArrowDownCircle className="h-[18px] w-[18px]" />} label="Low stock batches" value={buckets.low.length} tone="amber" />
+        {([
+          ["Expired batches", buckets.expired, "red", <CalendarX2 key="i" className="h-5 w-5" />],
+          ["Expiring soon", buckets.soon, "amber", <CalendarClock key="i" className="h-5 w-5" />],
+          ["Low stock batches", buckets.low, "amber", <ArrowDownCircle key="i" className="h-5 w-5" />],
+        ] as const).map(([label, list, tone, icon]) => (
+          <StatTile key={label} icon={icon} label={label} value={list.length} tone={tone} />
+        ))}
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">

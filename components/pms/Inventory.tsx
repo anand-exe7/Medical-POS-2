@@ -109,6 +109,7 @@ export const Inventory = ({
     return { total: rows.length, low, soon, expired, qty };
   }, [rows]);
 
+
   const handleExport = (format: "xlsx" | "csv") => {
     const sheet = INVENTORY_SHEET(rows);
     const stamp = new Date().toISOString().slice(0, 10);
@@ -376,7 +377,7 @@ export const Inventory = ({
                 Showing {filtered.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0} to{" "}
                 {Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length} entries
               </p>
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-1">
                 <PageBtn disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>
                   <ChevronLeft className="h-4 w-4" />
                 </PageBtn>
@@ -423,12 +424,12 @@ export const Inventory = ({
 
             <div>
               <p className="mb-2.5 text-[13px] font-semibold text-gray-900">Quick Summary</p>
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-                <StatTile icon={<Package className="h-[18px] w-[18px]" />} label="Total Items" value={summary.total} tone="blue" />
-                <StatTile icon={<ArrowDownCircle className="h-[18px] w-[18px]" />} label="Low Stock Items" value={summary.low} tone="amber" />
-                <StatTile icon={<CalendarClock className="h-[18px] w-[18px]" />} label="Expiring Soon" value={summary.soon} tone="amber" />
-                <StatTile icon={<CalendarX2 className="h-[18px] w-[18px]" />} label="Expired Items" value={summary.expired} tone="red" />
-                <StatTile icon={<Boxes className="h-[18px] w-[18px]" />} label="Total Stock Qty" value={summary.qty.toLocaleString("en-IN")} tone="blue" />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+                <StatTile icon={<Package className="h-5 w-5" />} label="Total Items" value={summary.total} tone="blue" />
+                <StatTile icon={<ArrowDownCircle className="h-5 w-5" />} label="Low Stock Items" value={summary.low} tone="amber" />
+                <StatTile icon={<CalendarClock className="h-5 w-5" />} label="Expiring Soon" value={summary.soon} tone="amber" />
+                <StatTile icon={<CalendarX2 className="h-5 w-5" />} label="Expired Items" value={summary.expired} tone="red" />
+                <StatTile icon={<Boxes className="h-5 w-5" />} label="Total Stock Qty" value={summary.qty.toLocaleString("en-IN")} tone="blue" />
               </div>
             </div>
           </div>
