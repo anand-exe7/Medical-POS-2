@@ -15,6 +15,8 @@ import {
   Package,
   Pencil,
   Trash2,
+  AlertTriangle,
+  X,
 } from "lucide-react";
 import type { Batch, DrugSchedule, Medicine, MedicineWithBatches, PurchaseUnitType } from "@/lib/types";
 import { amount, expiryState, monthSlash, scheduleLabel, unitNoun } from "@/lib/format";
@@ -22,6 +24,8 @@ import { type BatchRow } from "@/lib/store";
 import { deleteBatch, deleteMedicine, saveBatch, saveMedicine, adjustBatchStock } from "@/lib/actions";
 import { INVENTORY_SHEET } from "./exports";
 import { downloadCsv, downloadExcel } from "@/lib/xlsx";
+import { useSettings } from "./data";
+import { playAlarmBeep } from "@/lib/alarm";
 import { Button, Card, Field, Modal, PageTitle, Pill, Select, StatTile, TextInput } from "./ui";
 
 const PAGE_SIZE = 8;
@@ -33,12 +37,14 @@ export const Inventory = ({
   rows,
   onChanged,
   onAddStock,
+  onViewExpiry,
   role,
 }: {
   medicines: MedicineWithBatches[];
   rows: BatchRow[];
   onChanged: (message?: string) => void;
   onAddStock: () => void;
+  onViewExpiry: (tab: "expired" | "soon") => void;
   role: "admin" | "staff";
 }) => {
   const [tab, setTab] = useState<"stock" | "master">("stock");
@@ -51,6 +57,8 @@ export const Inventory = ({
   const [page, setPage] = useState(1);
   const [editBatch, setEditBatch] = useState<Batch | null>(null);
   const [editMedicine, setEditMedicine] = useState<Medicine | null>(null);
+  const { data: settings } = useSettings();
+  const alertMonths = settings?.expiry_alert_months ?? 6;
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -96,18 +104,28 @@ export const Inventory = ({
   /* ------------------------------ summary -------------------------------- */
   const summary = useMemo(() => {
     let low = 0;
+    let out = 0;
     let soon = 0;
     let expired = 0;
     let qty = 0;
     for (const { batch, medicine } of rows) {
       qty += batch.stock_qty;
-      if (batch.stock_qty > 0 && batch.stock_qty <= medicine.low_stock_threshold) low += 1;
-      const state = expiryState(batch.exp_date);
+      if (batch.stock_qty <= 0) out += 1;
+      else if (batch.stock_qty <= medicine.low_stock_threshold) low += 1;
+      const state = expiryState(batch.exp_date, alertMonths);
       if (state === "EXPIRED") expired += 1;
       else if (state === "SOON") soon += 1;
     }
-    return { total: rows.length, low, soon, expired, qty };
-  }, [rows]);
+    return { total: rows.length, low, out, soon, expired, qty };
+  }, [rows, alertMonths]);
+
+  // Show the stock/expiry alert once per open of the Stock tab. Dismissing it
+  // hides it until the screen is reopened.
+  const [alertDismissed, setAlertDismissed] = useState(false);
+  const showStockAlert =
+    tab === "stock" &&
+    !alertDismissed &&
+    (summary.low > 0 || summary.out > 0 || summary.expired > 0 || summary.soon > 0);
 
 
   const handleExport = (format: "xlsx" | "csv") => {
@@ -163,6 +181,38 @@ export const Inventory = ({
         />
       ) : (
         <>
+          {/* Low / out-of-stock alarm modal — pops up (with a repeating beep) when
+              the Stock tab opens and something needs restocking. */}
+          {showStockAlert && (
+            <StockAlarmModal
+              low={summary.low}
+              out={summary.out}
+              expired={summary.expired}
+              soon={summary.soon}
+              onClose={() => setAlertDismissed(true)}
+              onViewLow={() => {
+                setStockFilter("LOW");
+                setExpiryFilter("ALL");
+                setPage(1);
+                setAlertDismissed(true);
+              }}
+              onViewOut={() => {
+                setStockFilter("OUT");
+                setExpiryFilter("ALL");
+                setPage(1);
+                setAlertDismissed(true);
+              }}
+              onViewExpired={() => {
+                setAlertDismissed(true);
+                onViewExpiry("expired");
+              }}
+              onViewSoon={() => {
+                setAlertDismissed(true);
+                onViewExpiry("soon");
+              }}
+            />
+          )}
+
           {/* Filters */}
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <div className="relative w-full min-w-[220px] sm:w-[300px]">
@@ -779,6 +829,96 @@ const EditMedicineModal = ({
         </Field>
       </div>
     </Modal>
+  );
+};
+
+/* ---------------------------- low stock alarm ---------------------------- */
+
+const StockAlarmModal = ({
+  low,
+  out,
+  expired,
+  soon,
+  onClose,
+  onViewLow,
+  onViewOut,
+  onViewExpired,
+  onViewSoon,
+}: {
+  low: number;
+  out: number;
+  expired: number;
+  soon: number;
+  onClose: () => void;
+  onViewLow: () => void;
+  onViewOut: () => void;
+  onViewExpired: () => void;
+  onViewSoon: () => void;
+}) => {
+  // Ring a repeating alarm beep until the modal is closed. The audio engine is
+  // unlocked on the first tap in the app (see lib/alarm.ts) so this works on iOS
+  // Safari too, where audio can't start from a background effect.
+  React.useEffect(() => {
+    playAlarmBeep();
+    const timer = window.setInterval(playAlarmBeep, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  // A one-line summary of everything that needs attention.
+  const parts: string[] = [];
+  if (out > 0) parts.push(`${out} out of stock`);
+  if (low > 0) parts.push(`${low} running low`);
+  if (expired > 0) parts.push(`${expired} expired`);
+  if (soon > 0) parts.push(`${soon} expiring soon`);
+  const summaryLine = parts.join(" · ");
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col items-center gap-3 border-b border-[#f1e6c9] bg-amber-50 px-6 py-6 text-center">
+          <span className="flex h-14 w-14 animate-pulse items-center justify-center rounded-full bg-amber-100">
+            <AlertTriangle className="h-7 w-7 text-amber-600" />
+          </span>
+          <h3 className="text-[19px] font-bold text-amber-900">Inventory Alert</h3>
+          <p className="text-[14px] font-semibold text-amber-800">{summaryLine}</p>
+          <p className="text-[12.5px] text-amber-700">
+            These items need attention — reorder or remove expired stock.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2.5 px-6 py-5">
+          {out > 0 && (
+            <Button variant="danger" className="w-full justify-center" onClick={onViewOut}>
+              View out of stock ({out})
+            </Button>
+          )}
+          {expired > 0 && (
+            <Button variant="danger" className="w-full justify-center" onClick={onViewExpired}>
+              View expired ({expired})
+            </Button>
+          )}
+          {low > 0 && (
+            <button
+              onClick={onViewLow}
+              className="w-full cursor-pointer rounded-lg border border-amber-300 bg-white px-4 py-2.5 text-sm font-semibold text-amber-700 transition hover:bg-amber-50"
+            >
+              View low stock ({low})
+            </button>
+          )}
+          {soon > 0 && (
+            <button
+              onClick={onViewSoon}
+              className="w-full cursor-pointer rounded-lg border border-amber-300 bg-white px-4 py-2.5 text-sm font-semibold text-amber-700 transition hover:bg-amber-50"
+            >
+              View expiring soon ({soon})
+            </button>
+          )}
+          <Button variant="ghost" className="w-full justify-center" onClick={onClose}>
+            <X className="h-4 w-4" /> Close &amp; silence alarm
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 };
 

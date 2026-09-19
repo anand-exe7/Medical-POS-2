@@ -11,8 +11,14 @@ import { monthShort } from "@/lib/format";
 
 type Tab = "expired" | "soon" | "low";
 
-export const ExpiryAlert = ({ rows }: { rows: BatchRow[] }) => {
-  const [tab, setTab] = useState<Tab>("soon");
+export const ExpiryAlert = ({
+  rows,
+  initialTab = "soon",
+}: {
+  rows: BatchRow[];
+  initialTab?: Tab;
+}) => {
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [search, setSearch] = useState("");
   const { data: settings } = useSettings();
   const alertMonths = settings?.expiry_alert_months ?? 6;

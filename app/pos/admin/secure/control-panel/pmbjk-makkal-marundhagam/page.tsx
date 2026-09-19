@@ -2,6 +2,7 @@
 
 import React, { startTransition, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { expiryState } from "@/lib/format";
+import { bindAudioUnlock } from "@/lib/alarm";
 import {
   useMedicines,
   useBatchRows,
@@ -30,6 +31,7 @@ export default function PharmacyManagementSystem() {
   const [role, setRole] = useState<"admin" | "staff" | null>(null);
   const [checking, setChecking] = useState(true);
   const [screen, setScreen] = useState<ScreenKey>("billing");
+  const [expiryTab, setExpiryTab] = useState<"expired" | "soon" | "low">("soon");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [billingSearch, setBillingSearch] = useState("");
@@ -73,6 +75,9 @@ export default function PharmacyManagementSystem() {
     const timer = setTimeout(() => setToast(""), 2800);
     return () => clearTimeout(timer);
   }, [toast]);
+
+  /* --------- unlock audio on first tap so the stock alarm can ring on iOS -- */
+  useEffect(() => bindAudioUnlock(), []);
 
   /* ------------------------------ F2 shortcut ---------------------------- */
   useEffect(() => {
@@ -198,6 +203,10 @@ export default function PharmacyManagementSystem() {
               rows={batchRows}
               onChanged={notify}
               onAddStock={() => setScreen("purchase")}
+              onViewExpiry={(tab) => {
+                setExpiryTab(tab);
+                setScreen("expiry");
+              }}
               role={role}
             />
           )}
@@ -210,7 +219,7 @@ export default function PharmacyManagementSystem() {
             <Reports bills={bills} batchRows={batchRows} onChanged={notify} role={role} />
           )}
 
-          {screen === "expiry" && <ExpiryAlert rows={batchRows} />}
+          {screen === "expiry" && <ExpiryAlert rows={batchRows} initialTab={expiryTab} />}
 
           {screen === "settings" && role === "admin" && (
             <SettingsPanel settings={settings} suppliers={suppliers} medicines={medicines} onChanged={notify} />

@@ -135,7 +135,10 @@ export const Purchase = ({
 
   /* -------------------------------- save --------------------------------- */
   const handleSave = async () => {
-    if (!form.genericName.trim()) return setError("Enter the medicine (generic) name.");
+    // The visible "Medicine" field drives genericName; fall back to it so a typed
+    // name is never rejected as empty due to any state desync.
+    const genericName = (form.genericName || form.medicineName).trim();
+    if (!genericName) return setError("Enter the medicine (generic) name.");
     if (!form.brandName.trim()) return setError("Enter the brand name.");
     if (!form.batchNo.trim()) return setError("Enter the batch number.");
     if (!form.expDate) return setError("Expiry date (EXP DT) is mandatory.");
@@ -157,11 +160,11 @@ export const Purchase = ({
 
     const medicineId = await saveMedicine({
       id: form.medicineId || undefined,
-      generic_name: form.genericName.trim(),
+      generic_name: genericName,
       // brand_name / manufacturer only passed for new medicine inserts (legacy field).
       brand_name: form.brandName.trim(),
       manufacturer: form.manufacturer.trim(),
-      salt: form.salt.trim() || form.genericName.trim(),
+      salt: form.salt.trim() || genericName,
       schedule: form.schedule,
       hsn_code: form.hsnCode.trim(),
       gst_percent: Number(form.gst) || 0,
@@ -191,7 +194,7 @@ export const Purchase = ({
       gst_percent: Number(form.gst) || 0,
     });
 
-    onSaved(`Stock added — ${stockAdded} ${unitWord} of ${form.genericName.trim()}.`);
+    onSaved(`Stock added — ${stockAdded} ${unitWord} of ${genericName}.`);
     setForm({ ...blankForm(defaultGst), supplierId: form.supplierId, supplierName: form.supplierName, invoiceNo: form.invoiceNo, date: form.date });
   };
 
@@ -267,9 +270,16 @@ export const Purchase = ({
               <TextInput
                 value={form.medicineName}
                 onChange={(e) => {
-                  set("medicineName", e.target.value);
-                  set("genericName", e.target.value);
-                  set("medicineId", "");
+                  // Update every derived field in one atomic write so medicineName
+                  // and genericName can never fall out of sync (which was making the
+                  // "Enter the medicine name" error show even after typing it).
+                  const value = e.target.value;
+                  setForm((prev) => ({
+                    ...prev,
+                    medicineName: value,
+                    genericName: value,
+                    medicineId: "",
+                  }));
                   setShowResults(true);
                 }}
                 onFocus={() => setShowResults(true)}

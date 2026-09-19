@@ -243,20 +243,40 @@ export const Billing = ({
     doctor: string;
     quickBill: boolean;
   }) => {
-    const billId = await submitBill({
-      lines,
-      customer_id: customer.id,
-      customer_name: customer.name,
-      customer_phone: customer.phone,
-      customer_address: customer.address,
-      doctor_name: customer.doctor,
-      received_amount: receivedNum,
-      payment_method: payment,
-    });
-    setCustomerOpen(false);
-    clearBill();
-    onDone();
-    window.open(`/invoice/${billId}?print=1`, "_blank");
+    // iOS Safari blocks window.open() once it happens after an `await`, because it
+    // no longer counts as being inside the tap gesture — that's why the bill saved
+    // but no invoice opened on iPhone. Open the tab synchronously here (still inside
+    // the tap), then redirect it to the invoice once the bill id comes back.
+    const printWindow = typeof window !== "undefined" ? window.open("", "_blank") : null;
+    try {
+      const billId = await submitBill({
+        lines,
+        customer_id: customer.id,
+        customer_name: customer.name,
+        customer_phone: customer.phone,
+        customer_address: customer.address,
+        doctor_name: customer.doctor,
+        received_amount: receivedNum,
+        payment_method: payment,
+      });
+      setCustomerOpen(false);
+      clearBill();
+      onDone();
+
+      const url = `/invoice/${billId}?print=1`;
+      if (printWindow && !printWindow.closed) {
+        printWindow.location.href = url;
+      } else {
+        // Popup was blocked (or never opened) — fall back to the current tab so the
+        // bill is never lost.
+        window.location.href = url;
+      }
+    } catch (err) {
+      // Save failed — don't leave a stray blank tab behind.
+      if (printWindow && !printWindow.closed) printWindow.close();
+      setNotice("Could not save the bill. Please try again.");
+      throw err;
+    }
   };
 
   /* ----------------------------- keyboard ops ---------------------------- */
